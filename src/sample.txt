@@ -1,0 +1,15 @@
+//   extraReducers: (builder) => {
+  //     builder.addCase(fetchBoards.pending, (state) => {
+  //       state.loading = true;
+  //     });
+  //     builder.addCase(fetchBoards.fulfilled, (state, action) => {
+  //       state.loading = false;
+  //       state.boards = action.payload.results;
+  //       state.error = "";
+  //     });
+  //     builder.addCase(fetchBoards.rejected, (state, action) => {
+  //       state.loading = false;
+  //       state.boards = [];
+  //       state.error = "action.error.message?.toString();";
+  //     });
+  //   },
