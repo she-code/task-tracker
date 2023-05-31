@@ -1,21 +1,25 @@
 import { useRoutes } from "raviger";
 import Home from "../components/Home";
-import Login from "../components/Auth/Login";
+import Login from "../features/User/Login";
 import NotFound from "../components/NotFound";
 import AppContainer from "../components/AppContainer";
 import BoardList from "../features/Boards/BoardView";
 import CreateBoard from "../features/Boards/CreateBoard";
 import Board from "../features/Boards/Board";
+import Todos from "../features/Tasks/Tasks";
+import SignUp from "../features/User/SignUp";
 
 export default function AppRouter() {
   const routes = {
     "/": () => <Home />,
     "/login": () => <Login />,
+    "/signup": () => <SignUp />,
     "/boards": () => <BoardList />,
     "/createBoard": () => <CreateBoard />,
     "/boards/:boardId": ({ boardId }: { boardId: string }) => (
       <Board id={Number(boardId)} />
     ),
+    "/todos": () => <Todos />,
     "*": () => <NotFound />,
   };
   let routeResult = useRoutes(routes);

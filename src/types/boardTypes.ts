@@ -1,3 +1,5 @@
+import { Errors } from "./common";
+
 export type Board = {
   id?: number;
   created_date?: string;
@@ -13,7 +15,6 @@ export type BoardStateType = {
   title: string;
   description: string;
 };
-export type Errors<T> = Partial<Record<keyof T, string>>;
 
 export const validateBoard = (board: Board) => {
   const { title, description } = board;

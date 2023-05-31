@@ -25,7 +25,7 @@ export const fetchBoards = createAsyncThunk(
     try {
       dispatch(requestStart());
       const boards = await getBoards();
-      console.log({ boards });
+      // console.log({ boards });
       dispatch(getBoardsSuccess(boards.results));
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));

@@ -1,9 +1,9 @@
 import { Link } from "raviger";
 import React, { useState } from "react";
-import Modal from "../../common/Modal";
+import Modal from "../../components/Common/Modal/Modal";
 import EditTask from "./EditTask";
 
-export default function BoardCard(props: {
+export default function TaskCard(props: {
   title: string;
   description: string;
   id: number;

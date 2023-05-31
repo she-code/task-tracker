@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 import React, { useState, useEffect } from "react";
 import { login } from "../../utils/apiUtils";
-import CustomInputField from "../Common/InputField/CustomInputField";
+import CustomInputField from "../../components/Common/InputField/CustomInputField";
 
 export default function Login() {
   const [username, setUserName] = useState("");

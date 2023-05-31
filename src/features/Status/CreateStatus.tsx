@@ -1,48 +1,29 @@
 import React, { useState } from "react";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
-
-import { navigate } from "raviger";
-import { Board, validateBoard } from "../../types/boardTypes";
-import { createBoard } from "../../utils/apiUtils";
+import { Errors } from "../../types/common";
+import { Status, validateStatus } from "../../types/statusTypes";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
-import {
-  createBoardSuccess,
-  requestFailure,
-  requestStart,
-  setDescription,
-  setTitle,
-} from "./boardSlice";
-import { Errors } from "../../types/common";
+import { createStatus } from "./statusAction";
+import { setStatusDescription, setStatusTitle } from "./statusSlice";
 
-export default function CreateBoard() {
-  const [errors, setErrors] = useState<Errors<Board>>({});
+export default function CreateStatus(props: { boardId: number }) {
+  const { boardId } = props;
+  const [errors, setErrors] = useState<Errors<Status>>({});
   const dispatch = useAppDispacth();
-  const loading = useAppSelector((state: RootState) => state.boards.loading);
-  const error = useAppSelector((state: RootState) => state.boards.error);
-  const title = useAppSelector((state: RootState) => state.boards.title);
-  const description = useAppSelector(
-    (state: RootState) => state.boards.description
+  const { title, description, statusError, statusLoading } = useAppSelector(
+    (state: RootState) => state.statuses
   );
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const validationErrors = validateBoard({ title, description });
+    const validationErrors = validateStatus({ title, description });
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const data = await createBoard({ title, description });
-        console.log({ data });
-        dispatch(requestStart());
-        if (data) {
-          console.log({ data }, "ins");
-
-          dispatch(createBoardSuccess(data));
-          navigate(`/boards`);
-        }
+        dispatch(createStatus({ statusData: { title, description }, boardId }));
       } catch (error) {
         console.log(error);
-        dispatch(requestFailure((error as string).toString()));
       }
     }
   };
@@ -57,7 +38,7 @@ export default function CreateBoard() {
             </label>
             <CustomInputField
               handleInputChangeCB={(event) => {
-                dispatch(setTitle(event.target.value));
+                dispatch(setStatusTitle(event.target.value));
               }}
               type="text"
               value={title || ""}
@@ -74,7 +55,7 @@ export default function CreateBoard() {
             <CustomInputField
               handleInputChangeCB={(event) => {
                 console.log({ description, val: event.target.value });
-                dispatch(setDescription(event.target.value));
+                dispatch(setStatusDescription(event.target.value));
               }}
               type="text"
               name="description"
@@ -89,12 +70,12 @@ export default function CreateBoard() {
         <button
           type="submit"
           className="bg-green-600 rounded py-2 px-3 text-white "
-          disabled={loading}
+          disabled={statusLoading}
         >
           Submit
         </button>
       </form>
-      {error ? <p>{error}</p> : ""}
+      {statusError ? <p>{statusError}</p> : ""}
     </div>
   );
 }

@@ -18,6 +18,7 @@ export default function CustomInputField(props: {
       name={name}
       tabIndex={0}
       araia-label={name}
+      placeholder={name === "search" ? "Search" : ""}
     />
   );
 }

@@ -1,5 +1,8 @@
 import { Board } from "../types/boardTypes";
 import { PaginationParams } from "../types/common";
+import { Status } from "../types/statusTypes";
+import { Task } from "../types/taskTypes";
+import { User } from "../types/userTypes";
 
 const API_BASE_URL = "https://reactforall.onrender.com/api/";
 type RequestData =
@@ -7,6 +10,9 @@ type RequestData =
   | Board
   | PaginationParams
   | string
+  | Task
+  | User
+  | Status
   | {};
 type RequestMethod = "GET" | "POST" | "DELETE" | "PUT" | "PATCH";
 export const request = async (
@@ -55,13 +61,33 @@ export const request = async (
   }
 };
 
+/**Auth */
 export const login = (username: string, password: string) => {
   return request("auth-token/", "POST", { username, password });
 };
+
+export const register = (
+  username: string,
+  password1: string,
+  password2: string,
+  email: string
+) => {
+  return request("auth/registration/", "POST", {
+    username,
+    password1,
+    password2,
+    email,
+  });
+};
+/**Users */
 export const me = () => {
   return request("users/me", "GET", {});
 };
 
+export const addUser = (user: User) => {
+  return request("users/", "POST", user);
+};
+/**Boards */
 export const getBoards = () => {
   return request("boards/", "GET", {});
 };
@@ -78,4 +104,29 @@ export const getBoard = (id: number) => {
 
 export const deleteBoard = (id: number) => {
   return request(`boards/${id}/`, "DELETE", {});
+};
+
+/**Tasks */
+export const getTasks = (id: number) => {
+  return request(`boards/${id}/tasks/`, "GET", {});
+};
+
+export const createTask = (task: Task, id: number) => {
+  return request(`boards/${id}/tasks/`, "POST", task);
+};
+export const editTask = (task: Task, id: number) => {
+  return request(`boards/${id}/tasks/`, "PATCH", task);
+};
+
+export const deleteTask = (id: number) => {
+  return request(`boards/${id}/tasks/`, "DELETE", {});
+};
+
+/**Status */
+export const getStatusesApi = () => {
+  return request(`status/`, "GET", {});
+};
+
+export const createStatusApi = (status: Status) => {
+  return request(`status/`, "POST", status);
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
 
-import { Board, Errors, validateBoard } from "../../types/boardTypes";
+import { Board, validateBoard } from "../../types/boardTypes";
 import { editBoard } from "../../utils/apiUtils";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
@@ -12,6 +12,7 @@ import {
   updateBoardSuccess,
 } from "./boardSlice";
 import { fetchBoard } from "./boardActions";
+import { Errors } from "../../types/common";
 
 export default function EditBoard(props: { id: number }) {
   const [errors, setErrors] = useState<Errors<Board>>({});
