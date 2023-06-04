@@ -111,7 +111,7 @@ export const getTasks = (id: number) => {
   return request(`boards/${id}/tasks/`, "GET", {});
 };
 
-export const createTask = (task: Task, id: number) => {
+export const createTaskApi = (task: Task, id: number) => {
   return request(`boards/${id}/tasks/`, "POST", task);
 };
 export const editTask = (task: Task, id: number) => {

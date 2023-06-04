@@ -7,7 +7,6 @@ import {
   requestFailure,
   requestStart,
 } from "./statusSlice";
-import { get } from "http";
 
 export const createStatus = createAsyncThunk(
   "status/createStatus",

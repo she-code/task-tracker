@@ -19,9 +19,9 @@ export default function TaskCard(props: {
   };
 
   return (
-    <div className="bg-gray-400 rounded-lg shadow-lg m-5 p-5 w-80  h-44">
+    <div className=" bg-gray-300 rounded-lg shadow-lg m-5 p-5  h-40">
       <div className="flex justify-between">
-        <p className="text-xl font-semibold ">{title}</p>
+        <p className="text-lg font-semibold capitalize">{title}</p>
 
         <div className="relative">
           <button
@@ -70,7 +70,7 @@ export default function TaskCard(props: {
         </div>
       </div>
       <div>
-        <p className="text-lg">{description}</p>
+        <p className=" text-md capitalize">{description}</p>
       </div>
       <Modal open={showEditModal} closeCB={() => setShowEditModal(false)}>
         <EditTask id={id} boardId={boardId} />

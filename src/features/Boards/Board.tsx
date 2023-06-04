@@ -7,10 +7,13 @@ import Loading from "../../components/Common/Loading/Loading";
 import Modal from "../../components/Common/Modal/Modal";
 import CreateStatus from "../Status/CreateStatus";
 import { fetchStatuses } from "../Status/statusAction";
+import CreateTask from "../Tasks/CreateTask";
 
 export default function Board(props: { id: number }) {
   const { id } = props;
   const [showStatusModel, setShowStatusModel] = useState(false);
+  const [showTaskModel, setShowTaskModel] = useState(false);
+
   const dispatch = useAppDispacth();
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
   const loading = useAppSelector((state: RootState) => state.tasks.loading);
@@ -24,46 +27,19 @@ export default function Board(props: { id: number }) {
     dispatch(fetchStatuses());
   }, [dispatch, id]);
 
-  // const groupedStatuses: Record<string, Status[]> = {};
-
-  // statuses.forEach((status) => {
-  //   const boardId = status.description.split(":")[1];
-  //   if (groupedStatuses[boardId]) {
-  //     groupedStatuses[boardId].push(status);
-  //   } else {
-  //     groupedStatuses[boardId] = [status];
-  //   }
-  // });
-
-  // console.log({ groupedStatuses });
-
-  // console.log(groupedStatuses);
   const filteredStatuses = statuses.filter((status) => {
-    const statusBoardId = status.description.split(":")[1];
+    const statusBoardId = status.title.split(":")[1];
     return statusBoardId === id.toString();
   });
   const updatedStatuses = filteredStatuses.map((status) => {
-    const updatedStatus = { ...status }; // Create a new object with the same properties
+    const updatedStatus = { ...status };
     const statusTasks = tasks.filter(
       (task) => task?.status_object?.id === status.id
     );
-    updatedStatus.tasks = statusTasks; // Add the tasks to the `tasks` property of the new object
+    updatedStatus.tasks = statusTasks;
     return updatedStatus;
   });
   console.log({ updatedStatuses });
-  // const groupedData: { [key: number]: { title: string; items: Task[] } } =
-  //   tasks.reduce((acc, item) => {
-  //     const { status_object } = item;
-  //     const statusObjectId: number = status_object?.id as number;
-  //     if (!acc[statusObjectId]) {
-  //       acc[statusObjectId] = {
-  //         title: status_object?.title as string,
-  //         items: [],
-  //       };
-  //     }
-  //     acc[statusObjectId].items.push(item);
-  //     return acc;
-  //   }, {} as { [key: number]: { title: string; items: Task[] } });
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -120,14 +96,14 @@ export default function Board(props: { id: number }) {
           {Object.entries(updatedStatuses).map((status) => (
             <div
               key={status[1].id}
-              className="p-5  bg-white m-3 rounded-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 
-                scrollbar-thumb-rounded-full scrollbar-track-rounded-full max-h-screen"
+              className="p-4  bg-white m-3 rounded-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 
+                scrollbar-thumb-rounded-full scrollbar-track-rounded-full max-h-screen  w-96 shadow-md min-h-min"
             >
               <h2 className="font-semibold text-lg capitalize ml-2">
-                {status[1].title}
+                {status[1].title.split(":")[0]}
               </h2>
 
-              <div>
+              <div className="">
                 {status[1]?.tasks?.map((task) => (
                   <TaskCard
                     key={task.id}
@@ -141,6 +117,7 @@ export default function Board(props: { id: number }) {
               <button
                 className="flex focus:outline-none  px-4 py-2 rounded-md w-full hover:bg-gray-200
                   items-center justify-center mt-5 text-gray-500"
+                onClick={() => setShowTaskModel(true)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -159,6 +136,12 @@ export default function Board(props: { id: number }) {
 
                 <span className="text-lg ml-2">Add Task</span>
               </button>
+              <Modal
+                open={showTaskModel}
+                closeCB={() => setShowTaskModel(false)}
+              >
+                <CreateTask boardId={id} statusId={status[1]?.id as number} />
+              </Modal>
             </div>
           ))}
         </div>

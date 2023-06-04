@@ -1,4 +1,5 @@
 import { Board } from "./boardTypes";
+import { Errors } from "./common";
 import { Status } from "./statusTypes";
 
 export type Task = {
@@ -21,4 +22,26 @@ export type TaskStateType = {
   title: string;
   description: string;
   status: number;
+};
+
+export const validateTask = (task: Task) => {
+  const { title, description, board, status } = task;
+  const errors: Errors<Task> = {};
+  if (title.length < 1) {
+    errors.title = "Title is required";
+  }
+  if (title.length > 100) {
+    errors.title = "Title must be less than 100 characters";
+  }
+  if (description.length < 1) {
+    errors.description = "Description is required";
+  }
+  if (board === 0) {
+    errors.board = "Board is required";
+  }
+  if (status === 0) {
+    errors.status = "Status is required";
+  }
+
+  return errors;
 };

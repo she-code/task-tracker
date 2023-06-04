@@ -1,27 +1,42 @@
 import React, { useState } from "react";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
 import { Errors } from "../../types/common";
-import { Status, validateStatus } from "../../types/statusTypes";
+import { Status } from "../../types/statusTypes";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
-import { createStatus } from "./statusAction";
-import { setStatusDescription, setStatusTitle } from "./statusSlice";
+import { setDescription, setTitle } from "./taskSlice";
+import { validateTask } from "../../types/taskTypes";
+import { createTask } from "./taskActions";
 
-export default function CreateStatus(props: { boardId: number }) {
-  const { boardId } = props;
+export default function CreateTask(props: {
+  boardId: number;
+  statusId: number;
+}) {
+  const { boardId, statusId } = props;
   const [errors, setErrors] = useState<Errors<Status>>({});
   const dispatch = useAppDispacth();
-  const { title, description, statusError, statusLoading } = useAppSelector(
-    (state: RootState) => state.statuses
+  const { title, description } = useAppSelector(
+    (state: RootState) => state.tasks
   );
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const validationErrors = validateStatus({ title, description });
+    const validationErrors = validateTask({
+      title,
+      description,
+      status: statusId,
+      board: boardId,
+    });
+
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
       try {
-        dispatch(createStatus({ statusData: { title, description }, boardId }));
+        dispatch(
+          createTask({
+            task: { title, description, status: statusId, board: boardId },
+            id: boardId,
+          })
+        );
       } catch (error) {
         console.log(error);
       }
@@ -38,7 +53,7 @@ export default function CreateStatus(props: { boardId: number }) {
             </label>
             <CustomInputField
               handleInputChangeCB={(event) => {
-                dispatch(setStatusTitle(event.target.value));
+                dispatch(setTitle(event.target.value));
               }}
               type="text"
               value={title || ""}
@@ -55,7 +70,7 @@ export default function CreateStatus(props: { boardId: number }) {
             <CustomInputField
               handleInputChangeCB={(event) => {
                 console.log({ description, val: event.target.value });
-                dispatch(setStatusDescription(event.target.value));
+                dispatch(setDescription(event.target.value));
               }}
               type="text"
               name="description"
@@ -70,12 +85,12 @@ export default function CreateStatus(props: { boardId: number }) {
         <button
           type="submit"
           className="bg-green-600 rounded py-2 px-3 text-white "
-          disabled={statusLoading}
+          //disabled={statusLoading}
         >
           Submit
         </button>
       </form>
-      {statusError ? <p>{statusError}</p> : ""}
+      {/* {statusError ? <p>{statusError}</p> : ""} */}
     </div>
   );
 }
