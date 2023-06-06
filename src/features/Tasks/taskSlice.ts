@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Task, TaskStateType } from "../../types/taskTypes";
+import { getTaskApi } from "../../utils/apiUtils";
 
 const initialState: TaskStateType = {
   //   title: "",
@@ -16,8 +17,19 @@ const initialState: TaskStateType = {
   title: "",
   description: "",
   status: 0,
+  // due_date: new Date().toISOString().slice(0, 10),
 };
-
+export const fetchTask = createAsyncThunk(
+  "task/fetchTask",
+  async (
+    { boardId, taskId }: { boardId: number; taskId: number },
+    { dispatch }
+  ) => {
+    const response = await getTaskApi(boardId, taskId);
+    // Assuming the response contains the task data
+    return response.task;
+  }
+);
 const taskSlice = createSlice({
   name: "task",
   initialState,
@@ -32,8 +44,15 @@ const taskSlice = createSlice({
       state.loading = false;
       state.error = null;
       state.tasks.push(action.payload);
+      state.title = "";
+      state.description = "";
+      state.due_date = "";
     },
-
+    resetFields(state) {
+      state.title = "";
+      state.description = "";
+      state.due_date = "";
+    },
     setTitle(state, action: PayloadAction<string>) {
       state.title = action.payload;
     },
@@ -46,6 +65,16 @@ const taskSlice = createSlice({
     setTaskDescription(state, action: PayloadAction<string>) {
       state.task.description = action.payload;
     },
+    setDueDate(state, action: PayloadAction<string>) {
+      state.due_date = action.payload;
+    },
+    setTaskDueDate(state, action: PayloadAction<string>) {
+      state.task = {
+        ...state.task,
+        due_date: action.payload,
+      };
+    },
+
     requestStart(state) {
       state.loading = true;
       state.error = null;
@@ -55,6 +84,26 @@ const taskSlice = createSlice({
       state.error = null;
       state.tasks = state.tasks.map((Task) =>
         Task.id === action.payload.id ? action.payload : Task
+      );
+    },
+    updateTaskTitle: (
+      state,
+      action: PayloadAction<{ taskId: number; newTitle: string }>
+    ) => {
+      const { taskId, newTitle } = action.payload;
+      const taskToUpdate = state.tasks.find((task) => task.id === taskId);
+
+      if (taskToUpdate) {
+        taskToUpdate.title = newTitle;
+      }
+    },
+    updateTaskStatus: (state, action) => {
+      const { id, status } = action.payload;
+      state.loading = false;
+      state.error = null;
+      // Map over the tasks array and update the status of the matching task
+      state.tasks = state?.tasks?.map((task) =>
+        task.id === id ? { ...task, status } : task
       );
     },
     requestFailure(state, action: PayloadAction<string>) {
@@ -72,6 +121,14 @@ const taskSlice = createSlice({
       state.tasks = state.tasks.filter((task) => task.id !== action.payload);
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(fetchTask.fulfilled, (state, action) => {
+      state.task = action.payload;
+      // Extract the due date from the fetched task and set it
+      const due_date = action.payload?.title?.split("_")[1]?.trim() || "";
+      state.due_date = due_date;
+    });
+  },
 });
 
 export default taskSlice.reducer;
@@ -82,7 +139,11 @@ export const {
   requestFailure,
   createTaskSuccess,
   setTitle,
+  setDueDate,
+  setTaskDueDate,
+  resetFields,
   updateTaskSuccess,
+  updateTaskStatus,
   setDescription,
   setTaskDescription,
   setTaskTitle,

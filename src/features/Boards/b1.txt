@@ -1,0 +1,504 @@
+import React, { useEffect, useState } from "react";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { useAppDispacth, useAppSelector } from "../../app/hooks";
+import { RootState } from "../../app/store";
+import { fetchTasks, updateTaskAction } from "../Tasks/taskActions";
+import Loading from "../../components/Common/Loading/Loading";
+import Modal from "../../components/Common/Modal/Modal";
+import CreateStatus from "../Status/CreateStatus";
+import {
+  fetchStatuses,
+  updateStatusDescAction,
+  updateStatusTitleAction,
+} from "../Status/statusAction";
+import CreateTask from "../Tasks/CreateTask";
+import { Status } from "../../types/statusTypes";
+import { updateTaskStatus } from "../Tasks/taskSlice";
+
+import TaskCard1 from "../Tasks/TaskCard1";
+import StatusItem from "../Status/StatusItem";
+
+export default function Board(props: { id: number }) {
+  const { id } = props;
+  const [showStatusModel, setShowStatusModel] = useState(false);
+
+  const dispatch = useAppDispacth();
+  const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
+  const loading = useAppSelector((state: RootState) => state.tasks.loading);
+  const error = useAppSelector((state: RootState) => state.tasks.error);
+
+  const statuses = useAppSelector(
+    (state: RootState) => state.statuses.statuses
+  );
+
+  useEffect(() => {
+    dispatch(fetchTasks(id));
+    dispatch(fetchStatuses());
+  }, [dispatch, id]);
+
+  const filteredStatuses = statuses.filter((status) => {
+    const statusBoardId = status.title.split(":")[1];
+    return statusBoardId === id.toString();
+  });
+  const updatedStatuses = filteredStatuses.map((status) => {
+    const updatedStatus = { ...status };
+    const statusTasks = tasks.filter(
+      (task) => task?.status_object?.id === status.id
+    );
+    updatedStatus.tasks = statusTasks;
+    return updatedStatus;
+  });
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+  // const handleDragEnd = (result: any) => {
+  //   const { destination, source } = result;
+  //   if (!destination) return;
+  //   if (
+  //     destination.droppableId === source.droppableId &&
+  //     destination.index === source.index
+  //   ) {
+  //     console.log("same", destination, source);
+  //     return;
+  //   }
+  //   // Handle drag end logic here
+  //   const taskToUpdate = updatedStatuses.find(
+  //     (status: Status) => status?.id === parseInt(source?.droppableId)
+  //   )?.tasks?.[source?.index];
+  //   console.log(result, { taskToUpdate, dec: destination?.droppableId });
+  //   if (taskToUpdate) {
+  //     const updatedTask = {
+  //       id: taskToUpdate.id,
+  //       title: taskToUpdate.title,
+  //       description: taskToUpdate.description,
+  //       status: parseInt(destination?.droppableId),
+  //       board: taskToUpdate.board,
+  //     };
+  //     console.log({ updatedTask });
+  //     dispatch(updateTaskAction({ task: updatedTask, id }));
+  //   }
+  // };
+
+  const handleDragEnd = async (result: any) => {
+    const { destination, source } = result;
+    if (!destination) return;
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+    // Handle drag end logic here
+    const taskToUpdate = updatedStatuses.find(
+      (status: Status) => status?.id === parseInt(source?.droppableId)
+    )?.tasks?.[source?.index];
+    if (taskToUpdate) {
+      const updatedTask = {
+        id: taskToUpdate.id,
+        title: taskToUpdate.title,
+        description: taskToUpdate.description,
+        status: parseInt(destination?.droppableId),
+        board: taskToUpdate.board,
+      };
+      try {
+        const updatedTaskResponse = await dispatch(
+          updateTaskAction({ task: updatedTask, id })
+        );
+        // After the update is successful, dispatch an action to update the frontend state with the updated task
+        dispatch(updateTaskStatus(updatedTaskResponse));
+      } catch (error) {
+        console.error("Error updating task:", error);
+      }
+    }
+  };
+  return (
+    <div className="w-10/12  ml-64 mr-5 ">
+      <h1 className="text-3xl font-semibold my-5"> My Tasks</h1>
+      <div className="flex justify-between">
+        <button className="flex focus:outline-none border-2 border-gray-400 px-4 py-2 rounded  w-44  items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+            />
+          </svg>
+          <span className="text-lg ml-2">Filter </span>
+        </button>
+        <button
+          className="flex focus:outline-none bg-green-500 text-white px-4 py-2 rounded-lg  w-44 hover:bg-green-600
+            items-center justify-center font-semibold"
+          onClick={() => setShowStatusModel(true)}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 6v12m6-6H6"
+            />
+          </svg>
+
+          <span className="text-lg ml-2">Add List</span>
+        </button>
+      </div>
+      {loading ? (
+        <Loading />
+      ) : (
+        <div className="flex mt-5">
+          <DragDropContext onDragEnd={handleDragEnd}>
+            {/* Display all the statuses having the given board id */}
+            {Object.entries(updatedStatuses).map(([key, status]) => {
+              return (
+                <StatusItem
+                  key={status?.id}
+                  status={status}
+                  dispatch={dispatch}
+                  id={id}
+                />
+                //         <div
+                //           key={status?.id}
+                //           onMouseEnter={(_) => setShowDeleteBtn(true)}
+                //           onMouseLeave={(_) => setShowDeleteBtn(false)}
+                //           className="p-4 bg-white m-3 rounded-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 scrollbar-thumb-rounded-full scrollbar-track-rounded-full max-h-screen w-96 shadow-md min-h-min"
+                //         >
+                //           <div>
+                //             <div className="flex items-center">
+                //               <input
+                //                 type="text"
+                //                 name={status.title}
+                //                 value={status?.title.split(":")[0]}
+                //                 id=""
+                //                 className="border-0 focus:outline-none focus:border-2 focus:border-green-500 p-2
+                //              rounded-md w-full capitalize  text-xl font-semibold  mr-3"
+                //                 onChange={(e) =>
+                //                   dispatch(
+                //                     updateStatusTitleAction({
+                //                       statusData: status,
+                //                       newTitle: e.target.value,
+                //                       boardId: id,
+                //                     })
+                //                   )
+                //                 }
+                //               />
+                //               {showDeleteBtn && (
+                //                 <button className="focus:outline-none ">
+                //                   <svg
+                //                     xmlns="http://www.w3.org/2000/svg"
+                //                     fill="none"
+                //                     viewBox="0 0 24 24"
+                //                     strokeWidth={1.5}
+                //                     stroke="currentColor"
+                //                     className="w-6 h-6 text-red"
+                //                   >
+                //                     <path
+                //                       strokeLinecap="round"
+                //                       strokeLinejoin="round"
+                //                       d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                //                     />
+                //                   </svg>
+                //                 </button>
+                //               )}
+                //             </div>
+                //             <input
+                //               type="text"
+                //               name={status.description}
+                //               value={status?.description}
+                //               id=""
+                //               className="border-0 focus:outline-none focus:border-2 focus:border-green-500 p-2
+                //              rounded-md w-full capitalize  text-md  mb-3 mr-3 text-gray-500"
+                //               onChange={(e) =>
+                //                 dispatch(
+                //                   updateStatusDescAction({
+                //                     statusData: status,
+                //                     newDesc: e.target.value,
+                //                   })
+                //                 )
+                //               }
+                //             />
+                //           </div>
+
+                //           {status && (
+                //             <Droppable droppableId={status?.id?.toString() || ""}>
+                //               {(provided) => (
+                //                 <div
+                //                   ref={provided.innerRef}
+                //                   {...provided.droppableProps}
+                //                   className="min-h-[100px]"
+                //                 >
+                //                   {status?.tasks?.map((task, index) => {
+                //                     const taskId = task.id?.toString() || "";
+                //                     const isVisible = taskVisibility[taskId] || false;
+                //                     return (
+                //                       <Draggable
+                //                         key={task.id}
+                //                         draggableId={task?.id?.toString() || ""}
+                //                         index={index}
+                //                       >
+                //                         {(provided) => (
+                //                           <TaskCard1
+                //                             task={task}
+                //                             provided={provided}
+                //                             boardId={id}
+                //                             isVisible={isVisible}
+                //                             setTaskVisibility={setTaskVisibility}
+                //                           />
+                //                         )}
+                //                       </Draggable>
+                //                     );
+                //                   })}
+                //                   {provided.placeholder}
+                //                 </div>
+                //               )}
+                //             </Droppable>
+                //           )}
+                //           <Modal
+                //             open={showTaskModel && selectedStatusId === status?.id}
+                //             closeCB={() => {
+                //               setShowTaskModel(false);
+                //               setSelectedStatusId(null);
+                //             }}
+                //           >
+                //             <CreateTask
+                //               boardId={id}
+                //               statusId={status?.id as number}
+                //               handleClose={() => {
+                //                 setShowTaskModel(false);
+                //                 setSelectedStatusId(null);
+                //               }}
+                //             />
+                //           </Modal>
+                //           <button
+                //             className="flex focus:outline-none  px-4 py-2 rounded-md w-full hover:bg-gray-200
+                // items-center justify-center mt-5 text-gray-500"
+                //             onClick={() => {
+                //               console.log(status.id);
+                //               setShowTaskModel(true);
+                //               setSelectedStatusId(status?.id as number);
+                //             }}
+                //           >
+                //             <svg
+                //               xmlns="http://www.w3.org/2000/svg"
+                //               fill="none"
+                //               viewBox="0 0 24 24"
+                //               strokeWidth={1.5}
+                //               stroke="currentColor"
+                //               className="w-6 h-6"
+                //             >
+                //               <path
+                //                 strokeLinecap="round"
+                //                 strokeLinejoin="round"
+                //                 d="M12 6v12m6-6H6"
+                //               />
+                //             </svg>
+
+                //             <span className="text-lg ml-2">Add Task</span>
+                //           </button>
+                //         </div>
+              );
+            })}
+
+            {/* {Object.entries(updatedStatuses).map(([key, status]) => {
+              return (
+                <div
+                  key={status?.id}
+                  className="p-4 bg-white m-3 rounded-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 scrollbar-thumb-rounded-full scrollbar-track-rounded-full max-h-screen w-96 shadow-md min-h-min"
+                >
+                  <h2 className="font-semibold text-lg capitalize ml-2">
+                    {status?.title.split(":")[0]}
+                  </h2>
+                  {status && (
+                    <Droppable droppableId={status?.id?.toString() || ""}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className="min-h-[100px]"
+                        >
+                          {status?.tasks?.map((task, index) => {
+                            const taskId = task.id?.toString() || "";
+                            const isVisible = taskVisibility[taskId] || false;
+                            return (
+                              <Draggable
+                                key={task.id}
+                                draggableId={task?.id?.toString() || ""}
+                                index={index}
+                              >
+                                {(provided) => (
+                                  <TaskCard1
+                                    task={task}
+                                    provided={provided}
+                                    boardId={id}
+                                    isVisible={isVisible}
+                                    setTaskVisibility={setTaskVisibility}
+                                  />
+                                )}
+                              </Draggable>
+                            );
+                          })}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  )}
+                  <Modal
+                    open={showTaskModel}
+                    closeCB={() => setShowTaskModel(false)}
+                  >
+                    <CreateTask
+                      boardId={id}
+                      statusId={status?.id as number}
+                      handleClose={() => setShowTaskModel(false)}
+                    />
+                  </Modal>
+                  <button
+                    className="flex focus:outline-none  px-4 py-2 rounded-md w-full hover:bg-gray-200
+                  items-center justify-center mt-5 text-gray-500"
+                    onClick={(_) => {
+                      console.log(status.id);
+                      setShowTaskModel(true);
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 6v12m6-6H6"
+                      />
+                    </svg>
+
+                    <span className="text-lg ml-2">Add Task</span>
+                  </button>
+                </div>
+              );
+            })} */}
+          </DragDropContext>
+        </div>
+        // <div className="flex mt-5 ">
+        //   <DragDropContext onDragEnd={(e) => console.log(e)}>
+        //     {/* display all the statuses having the given board id */}
+        //     {Object.entries(updatedStatuses).map((status) => (
+        //       <div
+        //         key={status[1].id}
+        //         className="p-4  bg-white m-3 rounded-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300
+        //         scrollbar-thumb-rounded-full scrollbar-track-rounded-full max-h-screen  w-96 shadow-md min-h-min"
+        //       >
+        //         <h2 className="font-semibold text-lg capitalize ml-2">
+        //           {status[1].title.split(":")[0]}
+        //         </h2>
+        //         <Droppable droppableId={status[1]?.id?.toString() as string}>
+        //           {(provided) => {
+        //             return (
+        //               <div
+        //                 // key={status[1].id}
+        //                 ref={provided.innerRef}
+        //                 {...provided.droppableProps}
+        //               >
+        //                 {" "}
+        //                 {status[1]?.tasks?.map((task, index) => {
+        //                   return (
+        //                     <Draggable
+        //                       key={task.id}
+        //                       index={index}
+        //                       draggableId={task?.id?.toString() as string}
+        //                     >
+        //                       {(provided) => {
+        //                         return (
+        //                           <div
+        //                             className="bg-gray-100 p-2 my-2 rounded-md"
+        //                             ref={provided.innerRef}
+        //                             {...provided.draggableProps}
+        //                             {...provided.dragHandleProps}
+        //                           >
+        //                             {task.title}
+        //                           </div>
+        //                         );
+        //                       }}
+        //                     </Draggable>
+        //                   );
+        //                   // <TaskCard
+        //                   //   key={task.id}
+        //                   //   title={task.title}
+        //                   //   description={task.description}
+        //                   //   id={task.id as number}
+        //                   //   boardId={task.board as number}
+        //                   // />
+        //                 })}
+        //               </div>
+        //             );
+        //           }}
+        //           {/* <div className="">
+        //             {status[1]?.tasks?.map((task) => (
+        //               <TaskCard
+        //                 key={task.id}
+        //                 title={task.title}
+        //                 description={task.description}
+        //                 id={task.id as number}
+        //                 boardId={task.board as number}
+        //               />
+        //             ))}
+        //           </div> */}
+        //         </Droppable>
+        // <button
+        //   className="flex focus:outline-none  px-4 py-2 rounded-md w-full hover:bg-gray-200
+        //   items-center justify-center mt-5 text-gray-500"
+        //   onClick={() => setShowTaskModel(true)}
+        // >
+        //   <svg
+        //     xmlns="http://www.w3.org/2000/svg"
+        //     fill="none"
+        //     viewBox="0 0 24 24"
+        //     strokeWidth={1.5}
+        //     stroke="currentColor"
+        //     className="w-6 h-6"
+        //   >
+        //     <path
+        //       strokeLinecap="round"
+        //       strokeLinejoin="round"
+        //       d="M12 6v12m6-6H6"
+        //     />
+        //   </svg>
+
+        //   <span className="text-lg ml-2">Add Task</span>
+        // </button>
+        // <Modal
+        //   open={showTaskModel}
+        //   closeCB={() => setShowTaskModel(false)}
+        // >
+        //   <CreateTask boardId={id} statusId={status[1]?.id as number} />
+        // </Modal>
+        //       </div>
+        //     ))}
+        //   </DragDropContext>
+        // </div>
+      )}
+      <Modal open={showStatusModel} closeCB={() => setShowStatusModel(false)}>
+        <CreateStatus
+          boardId={id}
+          handleCloseModal={() => setShowStatusModel(false)}
+        />
+      </Modal>
+    </div>
+  );
+}

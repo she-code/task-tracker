@@ -15,7 +15,6 @@ import {
   createBoardSuccess,
   updateBoardSuccess,
 } from "./boardSlice";
-import { navigate } from "raviger";
 import { Board } from "../../types/boardTypes";
 
 // // Async thunk action for fetching boards
@@ -39,7 +38,6 @@ export const fetchBoard = createAsyncThunk(
     try {
       // dispatch(requestStart());
       const board = await getBoard(id);
-      console.log({ board });
       dispatch(getBoardSuccess(board));
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));
@@ -50,10 +48,10 @@ export const deleteBoardAction = createAsyncThunk(
   "boards/deleteBoard",
   async (boardId: number, { dispatch }) => {
     try {
-      dispatch(requestStart());
+      //dispatch(requestStart());
       await deleteBoard(boardId);
       dispatch(deleteBoardSuccess(boardId));
-      navigate("/boards");
+      // navigate("/boards");
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));
     }
@@ -66,7 +64,6 @@ export const createBoardAction = createAsyncThunk(
     try {
       dispatch(requestStart());
       const newBoard = await createBoard(boardData);
-      console.log({ newBoard });
       dispatch(createBoardSuccess(newBoard));
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));
@@ -80,7 +77,6 @@ export const updateBoardAction = createAsyncThunk(
     try {
       dispatch(requestStart());
       const updatedBoard = await editBoard(boardData, boardData?.id as number);
-      console.log({ updatedBoard });
       dispatch(updateBoardSuccess(updatedBoard));
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));

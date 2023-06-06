@@ -10,6 +10,14 @@ export type Status = {
   tasks?: Task[];
 };
 
+export type StatusWithTasks = {
+  id?: number | undefined;
+  title: string;
+  description: string;
+  created_date?: string | undefined;
+  modified_date?: string | undefined;
+  tasks?: Task[] | undefined;
+};
 export type StatusStateType = {
   statusLoading: boolean;
   statusError: string | null;
@@ -17,6 +25,7 @@ export type StatusStateType = {
   status: Status;
   title: string;
   description: string;
+  statusWithTasks?: StatusWithTasks;
 };
 
 export const validateStatus = (status: Status) => {

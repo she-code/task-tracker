@@ -8,7 +8,6 @@ export const fetchUser = createAsyncThunk(
     try {
       // dispatch(requestStart());
       const user = await me();
-      console.log({ user });
       dispatch(getUserSuccess(user));
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));

@@ -25,7 +25,6 @@ export default function Todos() {
       return;
     }
     dispatch(fetchTasks(boardId));
-    console.log(tasks);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boardId]);
   if (error) {

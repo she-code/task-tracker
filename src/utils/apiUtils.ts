@@ -111,17 +111,23 @@ export const getTasks = (id: number) => {
   return request(`boards/${id}/tasks/`, "GET", {});
 };
 
+export const getTaskApi = (id: number, taskId: number) => {
+  return request(`boards/${id}/tasks/${taskId}/`, "GET", {});
+};
 export const createTaskApi = (task: Task, id: number) => {
   return request(`boards/${id}/tasks/`, "POST", task);
 };
-export const editTask = (task: Task, id: number) => {
-  return request(`boards/${id}/tasks/`, "PATCH", task);
+export const updateTaskApi = (task: Task, id: number, taskId: number) => {
+  return request(`boards/${id}/tasks/${taskId}/`, "PATCH", task);
 };
 
-export const deleteTask = (id: number) => {
-  return request(`boards/${id}/tasks/`, "DELETE", {});
+export const deleteTaskApi = (taskId: number, boardId: number) => {
+  return request(`boards/${boardId}/tasks/${taskId}/`, "DELETE", {});
 };
 
+// export const updateTaskStatusApi = (statusId: Task, id: number) => {
+//   return request(`boards/${id}/tasks/`, "PATCH", {status:statusId});
+// }
 /**Status */
 export const getStatusesApi = () => {
   return request(`status/`, "GET", {});
@@ -129,4 +135,12 @@ export const getStatusesApi = () => {
 
 export const createStatusApi = (status: Status) => {
   return request(`status/`, "POST", status);
+};
+
+export const updateStatusApi = (status: Status, id: number) => {
+  return request(`status/${id}/`, "PATCH", status);
+};
+
+export const deleteStatusApi = (id: number) => {
+  return request(`status/${id}/`, "DELETE", {});
 };

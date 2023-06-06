@@ -12,6 +12,7 @@ export type Task = {
   board: number;
   board_object?: Board;
   status_object?: Status;
+  due_date?: string | null;
 };
 
 export type TaskStateType = {
@@ -22,6 +23,7 @@ export type TaskStateType = {
   title: string;
   description: string;
   status: number;
+  due_date?: string | null;
 };
 
 export const validateTask = (task: Task) => {

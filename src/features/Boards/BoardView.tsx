@@ -92,7 +92,7 @@ const BoardList: React.FC = () => {
         ))}
       </div>
       <Modal open={showModal} closeCB={() => setShowModal(false)}>
-        <CreateBoard />
+        <CreateBoard handleClose={() => setShowModal(false)} />
       </Modal>
     </div>
   );

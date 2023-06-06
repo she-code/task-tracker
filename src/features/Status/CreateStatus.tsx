@@ -7,8 +7,11 @@ import { RootState } from "../../app/store";
 import { createStatus } from "./statusAction";
 import { setStatusDescription, setStatusTitle } from "./statusSlice";
 
-export default function CreateStatus(props: { boardId: number }) {
-  const { boardId } = props;
+export default function CreateStatus(props: {
+  boardId: number;
+  handleCloseModal: () => void;
+}) {
+  const { boardId, handleCloseModal } = props;
   const [errors, setErrors] = useState<Errors<Status>>({});
   const dispatch = useAppDispacth();
   const { title, description, statusError, statusLoading } = useAppSelector(
@@ -22,9 +25,8 @@ export default function CreateStatus(props: { boardId: number }) {
     if (Object.keys(validationErrors).length === 0) {
       try {
         dispatch(createStatus({ statusData: { title, description }, boardId }));
-      } catch (error) {
-        console.log(error);
-      }
+        handleCloseModal();
+      } catch (error) {}
     }
   };
   return (
@@ -54,7 +56,6 @@ export default function CreateStatus(props: { boardId: number }) {
             </label>
             <CustomInputField
               handleInputChangeCB={(event) => {
-                console.log({ description, val: event.target.value });
                 dispatch(setStatusDescription(event.target.value));
               }}
               type="text"

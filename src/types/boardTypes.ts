@@ -1,4 +1,5 @@
 import { Errors } from "./common";
+import { StatusWithTasks } from "./statusTypes";
 
 export type Board = {
   id?: number;
@@ -14,6 +15,7 @@ export type BoardStateType = {
   error: string | null;
   title: string;
   description: string;
+  statuses: StatusWithTasks[];
 };
 
 export const validateBoard = (board: Board) => {

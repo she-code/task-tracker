@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
 
-import { navigate } from "raviger";
 import { Board, validateBoard } from "../../types/boardTypes";
 import { createBoard } from "../../utils/apiUtils";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
@@ -10,12 +9,13 @@ import {
   createBoardSuccess,
   requestFailure,
   requestStart,
+  resetInputs,
   setDescription,
   setTitle,
 } from "./boardSlice";
 import { Errors } from "../../types/common";
 
-export default function CreateBoard() {
+export default function CreateBoard(props: { handleClose: () => void }) {
   const [errors, setErrors] = useState<Errors<Board>>({});
   const dispatch = useAppDispacth();
   const loading = useAppSelector((state: RootState) => state.boards.loading);
@@ -24,6 +24,7 @@ export default function CreateBoard() {
   const description = useAppSelector(
     (state: RootState) => state.boards.description
   );
+  const { handleClose } = props;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -32,16 +33,14 @@ export default function CreateBoard() {
     if (Object.keys(validationErrors).length === 0) {
       try {
         const data = await createBoard({ title, description });
-        console.log({ data });
         dispatch(requestStart());
         if (data) {
-          console.log({ data }, "ins");
-
           dispatch(createBoardSuccess(data));
-          navigate(`/boards`);
+          dispatch(resetInputs());
+          handleClose();
+          // window.location.reload();
         }
       } catch (error) {
-        console.log(error);
         dispatch(requestFailure((error as string).toString()));
       }
     }
@@ -73,7 +72,6 @@ export default function CreateBoard() {
             </label>
             <CustomInputField
               handleInputChangeCB={(event) => {
-                console.log({ description, val: event.target.value });
                 dispatch(setDescription(event.target.value));
               }}
               type="text"
@@ -91,7 +89,7 @@ export default function CreateBoard() {
           className="bg-green-600 rounded py-2 px-3 text-white "
           disabled={loading}
         >
-          Submit
+          {loading ? "Please wait..." : "Submit"}
         </button>
       </form>
       {error ? <p>{error}</p> : ""}

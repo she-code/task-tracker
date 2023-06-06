@@ -1,23 +1,38 @@
 import React, { useEffect, useState } from "react";
+import { DragDropContext } from "@hello-pangea/dnd";
+import { debounce } from "lodash";
+
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
-import { fetchTasks } from "../Tasks/taskActions";
-import TaskCard from "../Tasks/TaskCard";
+import { fetchTasks, updateTaskAction } from "../Tasks/taskActions";
 import Loading from "../../components/Common/Loading/Loading";
 import Modal from "../../components/Common/Modal/Modal";
 import CreateStatus from "../Status/CreateStatus";
-import { fetchStatuses } from "../Status/statusAction";
-import CreateTask from "../Tasks/CreateTask";
+import {
+  deleteStatusAction,
+  fetchStatuses,
+  updateStatusDescAction,
+} from "../Status/statusAction";
+import { Status } from "../../types/statusTypes";
+import { updateTaskStatus } from "../Tasks/taskSlice";
+
+import StatusItem from "../Status/StatusItem";
+import { addStatusesToBoard, addTasksToBoard } from "./boardSlice";
 
 export default function Board(props: { id: number }) {
   const { id } = props;
   const [showStatusModel, setShowStatusModel] = useState(false);
-  const [showTaskModel, setShowTaskModel] = useState(false);
 
   const dispatch = useAppDispacth();
+  // const [statusDescription, setStatusDescription] = useState(status?.description);
+
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
   const loading = useAppSelector((state: RootState) => state.tasks.loading);
   const error = useAppSelector((state: RootState) => state.tasks.error);
+  const boardStatuses = useAppSelector(
+    (state: RootState) => state.boards.statuses
+  );
+
   const statuses = useAppSelector(
     (state: RootState) => state.statuses.statuses
   );
@@ -27,23 +42,120 @@ export default function Board(props: { id: number }) {
     dispatch(fetchStatuses());
   }, [dispatch, id]);
 
-  const filteredStatuses = statuses.filter((status) => {
-    const statusBoardId = status.title.split(":")[1];
-    return statusBoardId === id.toString();
-  });
-  const updatedStatuses = filteredStatuses.map((status) => {
-    const updatedStatus = { ...status };
-    const statusTasks = tasks.filter(
-      (task) => task?.status_object?.id === status.id
-    );
-    updatedStatus.tasks = statusTasks;
-    return updatedStatus;
-  });
-  console.log({ updatedStatuses });
+  useEffect(() => {
+    statuses.forEach((status) => {
+      const statusBoardId = status.title.split(":")[1];
+      if (statusBoardId === id.toString()) {
+        const updatedStatus = { ...status };
+        const statusTasks = tasks.filter(
+          (task) => task?.status_object?.id === status.id
+        );
+        updatedStatus.tasks = statusTasks;
 
+        if (
+          !boardStatuses.find((boardStatus) => boardStatus.id === status.id)
+        ) {
+          dispatch(addStatusesToBoard(updatedStatus));
+        } else {
+          dispatch(addTasksToBoard(updatedStatus));
+        }
+      }
+    });
+
+    console.log("updatedStatuses", boardStatuses);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, id, statuses, tasks]);
+
+  const handleDescriptionChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    status: Status
+  ) => {
+    const newDesc = e.target.value;
+    // setStatusDescription(newDesc);
+    console.log("newDesc", newDesc);
+    debouncedUpdateStatusDesc(status, newDesc);
+  };
+  const dispatchUpdateStatusDesc = (statusData: Status, newDesc: string) => {
+    dispatch(
+      updateStatusDescAction({
+        statusData: statusData,
+        newDesc: newDesc,
+      })
+    );
+  };
+  const debouncedUpdateStatusDesc = debounce(dispatchUpdateStatusDesc, 500); // Adjust the debounce delay as needed
+
+  useEffect(() => {
+    return () => {
+      debouncedUpdateStatusDesc.cancel();
+    };
+  }, [debouncedUpdateStatusDesc]);
+  const handleDeleteStatus = (statusId: number) => {
+    dispatch(deleteStatusAction({ statusId }));
+  };
   if (error) {
     return <div>Error: {error}</div>;
   }
+  // const handleDragEnd = (result: any) => {
+  //   const { destination, source } = result;
+  //   if (!destination) return;
+  //   if (
+  //     destination.droppableId === source.droppableId &&
+  //     destination.index === source.index
+  //   ) {
+  //     console.log("same", destination, source);
+  //     return;
+  //   }
+  //   // Handle drag end logic here
+  //   const taskToUpdate = updatedStatuses.find(
+  //     (status: Status) => status?.id === parseInt(source?.droppableId)
+  //   )?.tasks?.[source?.index];
+  //   console.log(result, { taskToUpdate, dec: destination?.droppableId });
+  //   if (taskToUpdate) {
+  //     const updatedTask = {
+  //       id: taskToUpdate.id,
+  //       title: taskToUpdate.title,
+  //       description: taskToUpdate.description,
+  //       status: parseInt(destination?.droppableId),
+  //       board: taskToUpdate.board,
+  //     };
+  //     console.log({ updatedTask });
+  //     dispatch(updateTaskAction({ task: updatedTask, id }));
+  //   }
+  // };
+
+  const handleDragEnd = async (result: any) => {
+    const { destination, source } = result;
+    if (!destination) return;
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+    // Handle drag end logic here
+    const taskToUpdate = boardStatuses?.find(
+      (status: Status) => status?.id === parseInt(source?.droppableId)
+    )?.tasks?.[source?.index];
+    if (taskToUpdate) {
+      const updatedTask = {
+        id: taskToUpdate.id,
+        title: taskToUpdate.title,
+        description: taskToUpdate.description,
+        status: parseInt(destination?.droppableId),
+        board: taskToUpdate.board,
+      };
+      try {
+        const updatedTaskResponse = await dispatch(
+          updateTaskAction({ task: updatedTask, id })
+        );
+        // After the update is successful, dispatch an action to update the frontend state with the updated task
+        dispatch(updateTaskStatus(updatedTaskResponse));
+      } catch (error) {
+        console.error("Error updating task:", error);
+      }
+    }
+  };
   return (
     <div className="w-10/12  ml-64 mr-5 ">
       <h1 className="text-3xl font-semibold my-5"> My Tasks</h1>
@@ -91,63 +203,30 @@ export default function Board(props: { id: number }) {
       {loading ? (
         <Loading />
       ) : (
-        <div className="flex mt-5 ">
-          {/* display all the statuses having the given board id */}
-          {Object.entries(updatedStatuses).map((status) => (
-            <div
-              key={status[1].id}
-              className="p-4  bg-white m-3 rounded-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 
-                scrollbar-thumb-rounded-full scrollbar-track-rounded-full max-h-screen  w-96 shadow-md min-h-min"
-            >
-              <h2 className="font-semibold text-lg capitalize ml-2">
-                {status[1].title.split(":")[0]}
-              </h2>
-
-              <div className="">
-                {status[1]?.tasks?.map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    title={task.title}
-                    description={task.description}
-                    id={task.id as number}
-                    boardId={task.board as number}
-                  />
-                ))}
-              </div>
-              <button
-                className="flex focus:outline-none  px-4 py-2 rounded-md w-full hover:bg-gray-200
-                  items-center justify-center mt-5 text-gray-500"
-                onClick={() => setShowTaskModel(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v12m6-6H6"
-                  />
-                </svg>
-
-                <span className="text-lg ml-2">Add Task</span>
-              </button>
-              <Modal
-                open={showTaskModel}
-                closeCB={() => setShowTaskModel(false)}
-              >
-                <CreateTask boardId={id} statusId={status[1]?.id as number} />
-              </Modal>
-            </div>
-          ))}
+        <div className="flex mt-5">
+          <DragDropContext onDragEnd={handleDragEnd}>
+            {/* Display all the statuses having the given board id */}
+            {Object.entries(boardStatuses)?.map(([key, status]) => {
+              return (
+                <StatusItem
+                  key={status?.id}
+                  status={status}
+                  dispatch={dispatch}
+                  id={id}
+                  handleDeleteStatusCB={handleDeleteStatus}
+                  handleDescriptionChangeCB={handleDescriptionChange}
+                />
+              );
+            })}
+          </DragDropContext>
         </div>
       )}
+
       <Modal open={showStatusModel} closeCB={() => setShowStatusModel(false)}>
-        <CreateStatus boardId={id} />
+        <CreateStatus
+          boardId={id}
+          handleCloseModal={() => setShowStatusModel(false)}
+        />
       </Modal>
     </div>
   );

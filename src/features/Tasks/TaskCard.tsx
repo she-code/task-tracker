@@ -1,7 +1,8 @@
 import { Link } from "raviger";
 import React, { useState } from "react";
 import Modal from "../../components/Common/Modal/Modal";
-import EditTask from "./EditTask";
+import { deleteTaskAction } from "./taskActions";
+import { useAppDispacth } from "../../app/hooks";
 
 export default function TaskCard(props: {
   title: string;
@@ -12,10 +13,11 @@ export default function TaskCard(props: {
   const { title, description, id, boardId } = props;
   const [isOpen, setOpen] = React.useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const dispatch = useAppDispacth();
 
   //handles formField deletion
-  const handleDeleteBoard = (boardId: number) => {
-    // dispatch(deleteBoardAction(boardId));
+  const handleDeleteBoard = () => {
+    dispatch(deleteTaskAction({ taskId: id, boardId }));
   };
 
   return (
@@ -61,7 +63,7 @@ export default function TaskCard(props: {
               </button>
               <button
                 className=" px-4 py-2 text-lg font-normal text-center text-neutral hover:bg-neutral-100 w-full "
-                onClick={(_) => handleDeleteBoard(id)}
+                onClick={handleDeleteBoard}
               >
                 Delete
               </button>
@@ -73,7 +75,7 @@ export default function TaskCard(props: {
         <p className=" text-md capitalize">{description}</p>
       </div>
       <Modal open={showEditModal} closeCB={() => setShowEditModal(false)}>
-        <EditTask id={id} boardId={boardId} />
+        {/* <EditTask id={id} boardId={boardId} /> */}
       </Modal>
     </div>
   );

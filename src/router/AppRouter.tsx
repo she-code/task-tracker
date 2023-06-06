@@ -15,7 +15,7 @@ export default function AppRouter() {
     "/login": () => <Login />,
     "/signup": () => <SignUp />,
     "/boards": () => <BoardList />,
-    "/createBoard": () => <CreateBoard />,
+    // "/createBoard": () => <CreateBoard />,
     "/boards/:boardId": ({ boardId }: { boardId: string }) => (
       <Board id={Number(boardId)} />
     ),

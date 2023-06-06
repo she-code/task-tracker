@@ -14,7 +14,11 @@ import {
 import { fetchBoard } from "./boardActions";
 import { Errors } from "../../types/common";
 
-export default function EditBoard(props: { id: number }) {
+export default function EditBoard(props: {
+  id: number;
+  handleCloseModal: () => void;
+}) {
+  const { handleCloseModal } = props;
   const [errors, setErrors] = useState<Errors<Board>>({});
   const dispatch = useAppDispacth();
   const board = useAppSelector((state: RootState) => state.boards.board);
@@ -32,13 +36,12 @@ export default function EditBoard(props: { id: number }) {
     if (Object.keys(validationErrors).length === 0) {
       try {
         const data = await editBoard(board, props.id);
-        console.log({ data });
         dispatch(updateBoardSuccess(data));
         if (data) {
-          window.location.href = "/boards";
+          handleCloseModal();
+          // window.location.href = "/boards";
         }
       } catch (error) {
-        console.log(error);
         dispatch(requestFailure((error as string).toString()));
       }
     }

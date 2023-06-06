@@ -4,18 +4,19 @@ import { Errors } from "../../types/common";
 import { Status } from "../../types/statusTypes";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
-import { setDescription, setTitle } from "./taskSlice";
+import { setDescription, setDueDate, setTitle } from "./taskSlice";
 import { validateTask } from "../../types/taskTypes";
 import { createTask } from "./taskActions";
 
 export default function CreateTask(props: {
   boardId: number;
   statusId: number;
+  handleClose: () => void;
 }) {
-  const { boardId, statusId } = props;
+  const { boardId, statusId, handleClose } = props;
   const [errors, setErrors] = useState<Errors<Status>>({});
   const dispatch = useAppDispacth();
-  const { title, description } = useAppSelector(
+  const { title, description, due_date } = useAppSelector(
     (state: RootState) => state.tasks
   );
 
@@ -30,13 +31,21 @@ export default function CreateTask(props: {
 
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
+      console.log(statusId, title);
       try {
         dispatch(
           createTask({
-            task: { title, description, status: statusId, board: boardId },
+            task: {
+              title,
+              description,
+              status: statusId,
+              board: boardId,
+              due_date,
+            },
             id: boardId,
           })
         );
+        handleClose();
       } catch (error) {
         console.log(error);
       }
@@ -44,7 +53,7 @@ export default function CreateTask(props: {
   };
   return (
     <div className="p-3">
-      <h1 className="text-2xl font-semibold my-5 text-center">Create Status</h1>
+      <h1 className="text-2xl font-semibold my-5 text-center">Create Task</h1>
       <form onSubmit={handleSubmit}>
         <div className="p-2  ">
           <div className="flex items-center">
@@ -69,7 +78,7 @@ export default function CreateTask(props: {
             </label>
             <CustomInputField
               handleInputChangeCB={(event) => {
-                console.log({ description, val: event.target.value });
+                console.log(event.target.value);
                 dispatch(setDescription(event.target.value));
               }}
               type="text"
@@ -81,7 +90,24 @@ export default function CreateTask(props: {
             <p className="text-red-500">{errors.description}</p>
           )}
         </div>
-
+        <div className="p-2  ">
+          <div className="flex items-center">
+            <label htmlFor="dueDate" className="text-lg font-semibold mr-2">
+              Due Date
+            </label>
+            <input
+              className="border-2 border-gray-200 border-l-blue-500 rounded-lg p-3 m-2 w-full focus:outline-none focus:border-l-green-500 focus:border-l-8"
+              type="date"
+              value={due_date || ""}
+              onChange={(e) => {
+                dispatch(setDueDate(e.target.value));
+              }}
+              name="dueDate"
+              tabIndex={0}
+              aria-label="dueDate"
+            />
+          </div>
+        </div>
         <button
           type="submit"
           className="bg-green-600 rounded py-2 px-3 text-white "

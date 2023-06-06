@@ -78,7 +78,7 @@ export default function BoardCard(props: {
         <p className="text-lg capitalize">{description}</p>
       </div>
       <Modal open={showEditModal} closeCB={() => setShowEditModal(false)}>
-        <EditBoard id={id} />
+        <EditBoard id={id} handleCloseModal={() => setShowEditModal(false)} />
       </Modal>
     </div>
   );
