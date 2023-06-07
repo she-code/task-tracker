@@ -10,7 +10,7 @@ export default function SideBar(props: { collapsed: boolean }) {
         className={`group fixed min-h-screen w-60 -translate-x-full overflow-hidden bg-white 
         shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] pt-8  ${
           collapsed ? "w-[77px]" : "w-60"
-        } translate-x-0 dark:bg-zinc-800`}
+        } translate-x-0 dark:bg-zinc-800 `}
         data-te-sidenav-init
         data-te-sidenav-hidden="false"
         data-te-sidenav-mode="side"
@@ -69,9 +69,9 @@ export default function SideBar(props: { collapsed: boolean }) {
               </li>
               <li className=" hover:bg-gray-500 py-5 px-2 hover:rounded-l-lg">
                 <ActiveLink
-                  href="/todos"
+                  href="/tasks"
                   className="text-white "
-                  key={"/todos"}
+                  key={"/tasks"}
                   exactActiveClass="text-green-500"
                 >
                   <svg
@@ -144,9 +144,9 @@ export default function SideBar(props: { collapsed: boolean }) {
             </li>
             <li className=" hover:bg-gray-500  hover:rounded-l-lg">
               <ActiveLink
-                href="/todos"
+                href="/tasks"
                 className="flex py-5 px-3 active:text-green-600"
-                key={"/todos"}
+                key={"/tasks"}
                 exactActiveClass="text-green-500"
               >
                 <svg
@@ -163,7 +163,7 @@ export default function SideBar(props: { collapsed: boolean }) {
                     d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z"
                   />
                 </svg>
-                <span className="ml-3 text-xl">Todos</span>
+                <span className="ml-3 text-xl">Tasks</span>
               </ActiveLink>
             </li>
           </ul>

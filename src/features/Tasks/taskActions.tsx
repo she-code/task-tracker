@@ -15,7 +15,7 @@ import {
   getTasks,
   updateTaskApi,
 } from "../../utils/apiUtils";
-import { Task } from "../../types/taskTypes";
+import { Task, stringifyTaskDescription } from "../../types/taskTypes";
 
 export const fetchTasks = createAsyncThunk(
   "boards/fetchBoards",
@@ -34,18 +34,21 @@ export const createTask = createAsyncThunk(
   "tasks/createTask",
   async ({ task, id }: { task: Task; id: number }, { dispatch }) => {
     try {
-      const { title, due_date } = task;
+      const { description, due_date, priority, is_completed } = task;
       let newTask: Task;
-      console.log({ task });
-      if (due_date === "") {
-        newTask = await createTaskApi(task, id);
-        console.log({ newTask });
-      } else {
-        const updatedTitle = title.concat(" _ ", due_date as string);
-        const updatedTask = { ...task, title: updatedTitle };
-        newTask = await createTaskApi(updatedTask, id);
-        console.log({ newTask });
-      }
+
+      const updatedTask = {
+        ...task,
+        description: stringifyTaskDescription({
+          description: description,
+          priority: priority,
+          due_date: due_date,
+          is_completed: is_completed,
+        }),
+      };
+      newTask = await createTaskApi(updatedTask, id);
+      console.log({ newTask });
+      // }
       if (newTask) {
         dispatch(createTaskSuccess(newTask));
       }
@@ -92,30 +95,16 @@ export const editTaskAction = createAsyncThunk(
   "tasks/editTask",
   async ({ task, boardId }: { task: Task; boardId: number }, { dispatch }) => {
     try {
-      const { due_date } = task;
+      // const { due_date, description, priority, is_completed } = task;
       let newTask: Task;
       console.log({ task });
-      if (due_date === "") {
-        const data: Task = {
-          id: task.id,
-          title: task.title,
-          description: task.description,
-          status: task?.status_object?.id as number,
-          board: task.board,
-        };
-        newTask = await updateTaskApi(data, boardId, task.id as number);
-        console.log({ newTask }, "no");
-      } else {
-        const data: Task = {
-          id: task.id,
-          title: task.title.concat(" _ ", task.due_date as string),
-          description: task.description,
-          status: task?.status_object?.id as number,
-          board: task.board,
-        };
-        newTask = await updateTaskApi(data, boardId, task.id as number);
-        console.log({ newTask }, "yes", { data });
-      }
+      const updatedTask: Task = {
+        ...task,
+        status: task?.status_object?.id as number,
+      };
+      newTask = await updateTaskApi(updatedTask, boardId, task.id as number);
+      console.log({ newTask }, "yes", { st: task.status });
+
       if (newTask) {
         dispatch(updateTaskSuccess(newTask));
       }

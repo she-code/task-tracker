@@ -1,24 +1,36 @@
 import React, { useEffect, useState } from "react";
+import { isFuture, isPast, isToday } from "date-fns";
 import { RootState } from "../../app/store";
 import { useAppSelector, useAppDispacth } from "../../app/hooks";
 import { fetchBoards } from "../Boards/boardActions";
-import { fetchTasks } from "./taskActions";
+import { deleteTaskAction, fetchTasks } from "./taskActions";
 import TaskCard from "./TaskCard";
+import { parseTaskDescription } from "../../types/taskTypes";
+import { setTaskFields } from "./taskSlice";
+import Modal from "../../components/Common/Modal/Modal";
+import EditTask from "./EditTask";
 
 export default function Todos() {
   const [showModal, setShowModal] = useState(false);
-  const [boardId, setBoardId] = useState(0);
   const [gridView, setGridView] = useState(true);
   const dispatch = useAppDispacth();
   const boards = useAppSelector((state: RootState) => state.boards.boards);
   const loading = useAppSelector((state: RootState) => state.boards.loading);
   const error = useAppSelector((state: RootState) => state.boards.error);
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
+  const [filterTasks, setFilterTasks] = useState("today");
+  const [filterOptions, setFilterOptions] = useState("all");
+  const [description, setDescription] = useState("");
+  const [boardId, setBoardId] = useState(boards[0]?.id || 0);
 
   useEffect(() => {
-    dispatch(fetchBoards());
+    dispatch(fetchBoards()).then(() => {
+      setBoardId(boards[0]?.id || 0);
+      console.log({ boardId });
+    });
+    console.log({ boardId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [boards.length]);
 
   useEffect(() => {
     if (boardId === 0) {
@@ -26,36 +38,82 @@ export default function Todos() {
     }
     dispatch(fetchTasks(boardId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boardId]);
+  }, [boardId, filterTasks, filterOptions]);
+
+  useEffect(() => {
+    tasks?.forEach((task) => {
+      if (task && task?.description) {
+        const parsedTaskDescription = parseTaskDescription(task?.description);
+
+        setDescription(parsedTaskDescription?.description);
+
+        console.log(
+          parsedTaskDescription.priority,
+          parsedTaskDescription.due_date,
+          parsedTaskDescription.is_completed
+        );
+
+        dispatch(
+          setTaskFields({
+            taskId: task.id as number,
+            taskDescription: {
+              due_date: parsedTaskDescription?.due_date || "",
+              is_completed: parsedTaskDescription?.is_completed || false,
+              priority: parsedTaskDescription?.priority || "low",
+            },
+          })
+        );
+      }
+    });
+
+    console.log({ tasks });
+  }, [dispatch, tasks]);
+
+  const handleTaskDelete = (taskId: number, boardId: number) => {
+    dispatch(deleteTaskAction({ taskId, boardId }));
+  };
   if (error) {
     return <div>Error: {error}</div>;
   }
 
   return (
-    <div className=" w-10/12  ml-64 mr-5">
-      <h1 className="text-3xl font-semibold my-5"> To Do</h1>
-      <div className="flex justify-between">
-        <button className="flex focus:outline-none border-2 border-gray-400 px-4 py-2 rounded  w-44  items-center justify-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6"
+    <div className=" w-10/12  md:ml-64 mr-5  sm:ml-20">
+      <h1 className="text-3xl font-semibold my-5"> Tasks</h1>
+      <div className="flex justify-between items-center">
+        <div className="flex  flex-wrap mt-5 ">
+          <select
+            aria-label="Filter Tasks"
+            title="Filter Tasks"
+            className="p-5 focus:outline-none  mr-5 focus:border-l-green-500 focus:border-l-4 py-2 text-lg font-semibold"
+            onChange={(e) => setFilterTasks(e.target.value)}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-            />
-          </svg>
-          <span className="text-lg ml-2">Filter </span>
-        </button>
+            <option value="today">Today</option>
+            <option value="overdue">Overdue</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="noDue">No Due Date</option>
+          </select>
+          <select
+            className="p-5 focus:outline-none   focus:border-l-green-500 focus:border-l-4 py-2 text-lg  font-semibold"
+            onChange={(e) => setFilterOptions(e.target.value)}
+            aria-label="Filter Options"
+            title="Filter Options"
+          >
+            <option selected hidden>
+              Filter
+            </option>
+            <option value="all">All</option>
+            <option value="completed">Completed</option>
+            <option value="incomplete">Incomplete</option>
+            <option value="high">High Priority</option>
+            <option value="low">Low Priority</option>
+            <option value="medium">Medium Priority</option>
+          </select>
+        </div>
 
         <div className="flex">
           <button
-            className="flex focus:outline-none border-2 border-gray-400 px-4 py-2 rounded-md mr-3 w-44  items-center justify-center"
+            className="flex focus:outline-none border-2 bg-green-500 text-white px-4 py-3 rounded-md 
+            mr-3 w-44  items-center justify-center text-xl"
             onClick={() => setShowModal(true)}
           >
             <svg
@@ -124,19 +182,28 @@ export default function Todos() {
         </div>
       </div>
       <div className="flex  flex-wrap mt-5">
-        <select
-          className="px-2 focus:outline-none font-light  focus:border-l-green-500 focus:border-l-4 py-2"
-          onChange={(e) => setBoardId(Number(e.target.value))}
-        >
-          <option value="" defaultValue=" Select Board" disabled selected>
-            Select Board
-          </option>{" "}
-          {boards?.map((board) => (
-            <option value={board.id} key={board.id}>
-              {board.title}
-            </option>
-          ))}
-        </select>
+        {boards?.length === 0 ? (
+          <div>No Boards are Created</div>
+        ) : (
+          <div className="flex items-center">
+            <label className="mr-2 text-xl font-semibold" htmlFor="selectBoard">
+              Board:{" "}
+            </label>
+            <select
+              aria-label="Select Board"
+              title="selectBoard"
+              className="px-2 focus:outline-none font-light  focus:border-l-green-500 focus:border-l-4 py-2"
+              onChange={(e) => setBoardId(Number(e.target.value))}
+              value={boardId}
+            >
+              {boards?.map((board) => (
+                <option value={board.id} key={board.id}>
+                  {board.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
       <div>
         {loading ? (
@@ -146,17 +213,98 @@ export default function Todos() {
             {tasks.length === 0 ? (
               <p>No tasks created</p>
             ) : (
-              <div className="grid grid-cols-3 gap-4 mt-5">
+              <div className="grid md:grid-cols-3 gap-4 mt-5 sm:grid-cols-1">
                 {tasks &&
-                  tasks.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      title={task.title}
-                      description={task.description}
-                      id={task.id as number}
-                      boardId={task.board as number}
-                    />
-                  ))}
+                  tasks
+                    .filter((task) => {
+                      const taskDueDate = new Date(task?.due_date || "");
+
+                      // Filter based on filterTasks
+                      switch (filterTasks) {
+                        case "all":
+                          break;
+                        case "today":
+                          if (!isToday(taskDueDate)) return false;
+                          break;
+                        case "overdue":
+                          if (!isPast(taskDueDate)) return false;
+                          break;
+                        case "upcoming":
+                          if (!isFuture(taskDueDate)) return false;
+                          break;
+                        case "noDue":
+                          if (task.due_date) return false;
+                          break;
+                        default:
+                          break;
+                      }
+
+                      // Filter based on filterOptions
+                      switch (filterOptions) {
+                        case "all":
+                          break;
+                        case "completed":
+                          if (!task.is_completed) return false;
+                          break;
+                        case "incomplete":
+                          if (task.is_completed) return false;
+                          break;
+                        case "high":
+                          if (task.priority !== "high") return false;
+                          break;
+                        case "low":
+                          if (task.priority !== "low") return false;
+                          break;
+                        case "medium":
+                          if (task.priority !== "medium") return false;
+                          break;
+                        default:
+                          break;
+                      }
+
+                      return true;
+                    })
+                    .map((task) => {
+                      return (
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          id={task.id as number}
+                          boardId={task.board as number}
+                          handleDeleteTaskActionCB={handleTaskDelete}
+                        />
+                      );
+                    })}
+
+                {/* {tasks &&
+                  tasks
+                    .filter((task) => {
+                      switch (filterTasks) {
+                        case "all":
+                          return true;
+                        case "today":
+                          return isToday(new Date(task?.due_date || ""));
+                        case "overdue":
+                          return isPast(new Date(task?.due_date || ""));
+                        case "upcoming":
+                          return isFuture(new Date(task?.due_date || ""));
+                        case "noDue":
+                          return !task.due_date;
+                        default:
+                          return true;
+                      }
+                    })
+                    .map((task) => {
+                      return (
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          id={task.id as number}
+                          boardId={task.board as number}
+                          handleDeleteTaskActionCB={handleTaskDelete}
+                        />
+                      );
+                    })} */}
               </div>
             )}
           </div>
@@ -167,7 +315,9 @@ export default function Todos() {
             {tasks.length === 0 ? (
               <p>No Tasks Created</p>
             ) : (
-              <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div
+                className={`overflow-x-auto sm:-mx-6 lg:-mx-8  max-h-[90%] overflow-y-auto `}
+              >
                 <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
                   <div className="overflow-hidden">
                     <table className="min-w-full text-left text-sm font-light">
@@ -183,10 +333,16 @@ export default function Todos() {
                             Description
                           </th>
                           <th scope="col" className="px-6 py-4 text-xl">
+                            Priority
+                          </th>
+                          <th scope="col" className="px-6 py-4 text-xl">
                             Status
                           </th>
                           <th scope="col" className="px-6 py-4 text-xl">
                             Created At
+                          </th>
+                          <th scope="col" className="px-6 py-4 text-xl">
+                            Due{" "}
                           </th>
                           <th scope="col" className="px-6 py-4 text-xl">
                             Action
@@ -195,64 +351,146 @@ export default function Todos() {
                       </thead>
                       <tbody>
                         {tasks &&
-                          tasks.map((task, index) => (
-                            <tr
-                              className="border-b bg-neutral-100"
-                              key={task.id}
-                            >
-                              <td className="whitespace-nowrap px-6 py-4 font-medium">
-                                <p>{index + 1}</p>
-                              </td>
-                              <td className="whitespace-nowrap px-6 py-4  text-lg capitalize">
-                                <p>{task.title}</p>
-                              </td>
-                              <td className="whitespace-nowrap px-6 py-4 text-lg first-letter:capitalize">
-                                <p>{task.description}</p>
-                              </td>
-                              <td className="whitespace-nowrap px-6 py-4 text-lg capitalize">
-                                <p>{task.status_object?.title}</p>
-                              </td>
-                              <td className="whitespace-nowrap px-6 py-4 text-lg">
-                                <p>{task.created_date?.split("T")[0]}</p>
-                              </td>
-                              <td className="whitespace-nowrap px-6 py-4 text-lg">
-                                <div className="flex justify-between">
-                                  <button className="mr-2">
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      strokeWidth={1.5}
-                                      stroke="currentColor"
-                                      className="w-6 h-6 text-green-500"
+                          tasks
+                            .filter((task) => {
+                              const taskDueDate = new Date(
+                                task?.due_date || ""
+                              );
+
+                              // Filter based on filterTasks
+                              switch (filterTasks) {
+                                case "today":
+                                  if (!isToday(taskDueDate)) return false;
+                                  break;
+                                case "overdue":
+                                  if (!isPast(taskDueDate)) return false;
+                                  break;
+                                case "upcoming":
+                                  if (!isFuture(taskDueDate)) return false;
+                                  break;
+                                case "noDue":
+                                  if (task.due_date) return false;
+                                  break;
+                                default:
+                                  break;
+                              }
+
+                              // Filter based on filterOptions
+                              switch (filterOptions) {
+                                case "completed":
+                                  if (!task.is_completed) return false;
+                                  break;
+                                case "incomplete":
+                                  if (task.is_completed) return false;
+                                  break;
+                                case "high":
+                                  if (task.priority !== "high") return false;
+                                  break;
+                                case "low":
+                                  if (task.priority !== "low") return false;
+                                  break;
+                                case "medium":
+                                  if (task.priority !== "medium") return false;
+                                  break;
+                                default:
+                                  break;
+                              }
+
+                              return true;
+                            })
+                            .map((task, index) => (
+                              <tr
+                                className="border-b bg-neutral-100"
+                                key={task.id}
+                              >
+                                <td className="whitespace-nowrap px-6 py-4 font-medium">
+                                  <p>{index + 1}</p>
+                                </td>
+                                <td
+                                  className={`whitespace-nowrap px-6 py-4  text-lg capitalize ${
+                                    task.is_completed
+                                      ? "line-through"
+                                      : "no-underline"
+                                  }`}
+                                >
+                                  <p>{task.title}</p>
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4 text-lg first-letter:capitalize">
+                                  <p>{description}</p>
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4 text-lg first-letter:capitalize">
+                                  <p>{task.priority}</p>
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4 text-lg capitalize">
+                                  <p>
+                                    {task.status_object?.title?.split(":")[0]}
+                                  </p>
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4 text-lg">
+                                  <p>{task.created_date?.split("T")[0]}</p>
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4 text-lg first-letter:capitalize">
+                                  <p>{task.due_date}</p>
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4 text-lg">
+                                  <div className="flex justify-between">
+                                    <button
+                                      className="mr-2"
+                                      onClick={() => setShowModal(true)}
                                     >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-                                      />
-                                    </svg>
-                                  </button>
-                                  <button className="mr-2">
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      strokeWidth={1.5}
-                                      stroke="currentColor"
-                                      className="w-6 h-6 text-red-500"
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={1.5}
+                                        stroke="currentColor"
+                                        className="w-6 h-6 text-green-500"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                                        />
+                                      </svg>
+                                    </button>
+                                    <button
+                                      className="mr-2"
+                                      onClick={() =>
+                                        handleTaskDelete(
+                                          task?.id as number,
+                                          task.board
+                                        )
+                                      }
                                     >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                                      />
-                                    </svg>
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={1.5}
+                                        stroke="currentColor"
+                                        className="w-6 h-6 text-red-500"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                                        />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </td>
+                                <Modal
+                                  open={showModal}
+                                  closeCB={() => setShowModal(false)}
+                                >
+                                  <EditTask
+                                    boardId={task.board}
+                                    taskId={task.id as number}
+                                    handleCloseModal={() => setShowModal(false)}
+                                  />
+                                </Modal>
+                              </tr>
+                            ))}
                       </tbody>
                     </table>
                   </div>
@@ -262,9 +500,6 @@ export default function Todos() {
           </div>
         )}
       </div>
-      {/* <Modal open={showModal} closeCB={() => setShowModal(false)}>
-        <CreateBoard />
-      </Modal> */}
     </div>
   );
 }

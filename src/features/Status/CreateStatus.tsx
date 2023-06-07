@@ -5,7 +5,7 @@ import { Status, validateStatus } from "../../types/statusTypes";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
 import { createStatus } from "./statusAction";
-import { setStatusDescription, setStatusTitle } from "./statusSlice";
+import { setDescription, setTitle } from "./statusSlice";
 
 export default function CreateStatus(props: {
   boardId: number;
@@ -40,7 +40,7 @@ export default function CreateStatus(props: {
             </label>
             <CustomInputField
               handleInputChangeCB={(event) => {
-                dispatch(setStatusTitle(event.target.value));
+                dispatch(setTitle(event.target.value));
               }}
               type="text"
               value={title || ""}
@@ -56,7 +56,7 @@ export default function CreateStatus(props: {
             </label>
             <CustomInputField
               handleInputChangeCB={(event) => {
-                dispatch(setStatusDescription(event.target.value));
+                dispatch(setDescription(event.target.value));
               }}
               type="text"
               name="description"

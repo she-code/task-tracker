@@ -1,5 +1,10 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Task, TaskStateType } from "../../types/taskTypes";
+import {
+  Task,
+  TaskDescriptionType,
+  TaskStateType,
+  UpdateTaskPayload,
+} from "../../types/taskTypes";
 import { getTaskApi } from "../../utils/apiUtils";
 
 const initialState: TaskStateType = {
@@ -17,6 +22,8 @@ const initialState: TaskStateType = {
   title: "",
   description: "",
   status: 0,
+  priority: "low",
+  is_completed: false,
   // due_date: new Date().toISOString().slice(0, 10),
 };
 export const fetchTask = createAsyncThunk(
@@ -47,6 +54,7 @@ const taskSlice = createSlice({
       state.title = "";
       state.description = "";
       state.due_date = "";
+      state.priority = "low";
     },
     resetFields(state) {
       state.title = "";
@@ -74,7 +82,35 @@ const taskSlice = createSlice({
         due_date: action.payload,
       };
     },
+    setTaskFields(state, action: PayloadAction<UpdateTaskPayload>) {
+      const { priority, due_date, is_completed } =
+        action.payload.taskDescription;
 
+      // Find the task based on its ID or any other identifier
+      const taskToUpdate = state.tasks.find(
+        (task) => task.id === action.payload.taskId
+      );
+
+      if (taskToUpdate) {
+        // Update the fields of the found task
+        taskToUpdate.priority = priority;
+        taskToUpdate.due_date = due_date;
+        taskToUpdate.is_completed = is_completed;
+      }
+    },
+
+    setPriority(state, action: PayloadAction<string>) {
+      state.priority = action.payload;
+    },
+    setTaskPriority(state, action: PayloadAction<string>) {
+      state.task.priority = action.payload;
+    },
+    setTaskCompleted(state, action: PayloadAction<boolean>) {
+      state.task.is_completed = action.payload;
+    },
+    setCompleted(state, action: PayloadAction<boolean>) {
+      state.is_completed = action.payload;
+    },
     requestStart(state) {
       state.loading = true;
       state.error = null;
@@ -147,5 +183,10 @@ export const {
   setDescription,
   setTaskDescription,
   setTaskTitle,
+  setCompleted,
+  setPriority,
+  setTaskFields,
+  setTaskPriority,
+  setTaskCompleted,
   deleteTaskSuccess,
 } = taskSlice.actions;

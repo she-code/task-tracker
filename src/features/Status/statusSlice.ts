@@ -42,14 +42,17 @@ const StatusSlice = createSlice({
       state.title = "";
       state.description = "";
     },
-    setStatusTitle(state, action: PayloadAction<string>) {
+    setTitle(state, action: PayloadAction<string>) {
       state.title = action.payload;
     },
-    setStatusDescription(state, action: PayloadAction<string>) {
+    setDescription(state, action: PayloadAction<string>) {
       state.description = action.payload;
     },
     setStatusWithTasks(state, action: PayloadAction<StatusWithTasks>) {
       state.statusWithTasks = action.payload;
+    },
+    setStatusDescription(state, action: PayloadAction<string>) {
+      state.status.description = action.payload;
     },
     updateStatus(state, action: PayloadAction<Status>) {
       state.statusLoading = false;
@@ -73,8 +76,8 @@ export const {
   createStatusSuccess,
   requestFailure,
   requestStart,
-  setStatusDescription,
-  setStatusTitle,
+  setDescription,
+  setTitle,
   updateStatus,
   deleteStatus,
   setStatusWithTasks,

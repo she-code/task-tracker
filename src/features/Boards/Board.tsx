@@ -17,7 +17,11 @@ import { Status } from "../../types/statusTypes";
 import { updateTaskStatus } from "../Tasks/taskSlice";
 
 import StatusItem from "../Status/StatusItem";
-import { addStatusesToBoard, addTasksToBoard } from "./boardSlice";
+import {
+  addStatusesToBoard,
+  addTasksToBoard,
+  clearBoardWithStatuses,
+} from "./boardSlice";
 
 export default function Board(props: { id: number }) {
   const { id } = props;
@@ -42,9 +46,70 @@ export default function Board(props: { id: number }) {
     dispatch(fetchStatuses());
   }, [dispatch, id]);
 
+  // useEffect(() => {
+  //   statuses.forEach((status) => {
+  //     const statusBoardId = status.title.split(":")[1];
+  //     if (statusBoardId === id.toString()) {
+  //       const updatedStatus = { ...status };
+  //       const statusTasks = tasks.filter(
+  //         (task) => task?.status_object?.id === status.id
+  //       );
+  //       updatedStatus.tasks = statusTasks;
+
+  //       if (
+  //         !boardStatuses.find((boardStatus) => boardStatus.id === status.id)
+  //       ) {
+  //         dispatch(addStatusesToBoard(updatedStatus));
+  //       } else {
+  //         dispatch(addTasksToBoard(updatedStatus));
+  //       }
+  //     }
+  //   });
+
+  //   console.log("updatedStatuses", boardStatuses);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [dispatch, id, statuses, tasks]);
+  // useEffect(() => {
+  //   statuses.forEach((status) => {
+  //     const statusBoardId = status.title.split(":")[1];
+  //     if (statusBoardId === id.toString()) {
+  //       const updatedStatus = { ...status };
+  //       const statusTasks = tasks.filter(
+  //         (task) => task?.status_object?.id === status.id
+  //       );
+  //       updatedStatus.tasks = statusTasks;
+
+  //       const existingStatus = boardStatuses.find(
+  //         (boardStatus) => boardStatus.id === status.id
+  //       );
+
+  //       if (!existingStatus) {
+  //         dispatch(addStatusesToBoard(updatedStatus));
+  //       } else {
+  //         // Check if the updated status has any new tasks
+  //         const newTasks = statusTasks.filter(
+  //           (task) =>
+  //             !existingStatus?.tasks?.find(
+  //               (existingTask) => existingTask.id === task.id
+  //             )
+  //         );
+
+  //         if (newTasks.length > 0) {
+  //           dispatch(addTasksToBoard(updatedStatus));
+  //         }
+  //       }
+  //     } else {
+  //       return;
+  //     }
+  //   });
+  //   console.log("updatedStatuses", boardStatuses);
+
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [dispatch, id, statuses, tasks]);
   useEffect(() => {
     statuses.forEach((status) => {
       const statusBoardId = status.title.split(":")[1];
+
       if (statusBoardId === id.toString()) {
         const updatedStatus = { ...status };
         const statusTasks = tasks.filter(
@@ -52,19 +117,38 @@ export default function Board(props: { id: number }) {
         );
         updatedStatus.tasks = statusTasks;
 
-        if (
-          !boardStatuses.find((boardStatus) => boardStatus.id === status.id)
-        ) {
+        const existingStatus = boardStatuses.find(
+          (boardStatus) => boardStatus.id === status.id
+        );
+
+        if (!existingStatus) {
           dispatch(addStatusesToBoard(updatedStatus));
         } else {
-          dispatch(addTasksToBoard(updatedStatus));
+          const newTasks = statusTasks.filter(
+            (task) =>
+              !existingStatus?.tasks?.find(
+                (existingTask) => existingTask.id === task.id
+              )
+          );
+
+          if (newTasks.length > 0) {
+            dispatch(addTasksToBoard(updatedStatus));
+          }
         }
+      } else {
+        return;
       }
     });
 
-    console.log("updatedStatuses", boardStatuses);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, id, statuses, tasks]);
+  useEffect(() => {
+    // Cleanup function when leaving the page
+    return () => {
+      dispatch(clearBoardWithStatuses());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDescriptionChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -157,7 +241,7 @@ export default function Board(props: { id: number }) {
     }
   };
   return (
-    <div className="w-10/12  ml-64 mr-5 ">
+    <div className="w-10/12  md:ml-64   sm:ml-20 mr-5 ">
       <h1 className="text-3xl font-semibold my-5"> My Tasks</h1>
       <div className="flex justify-between">
         <button className="flex focus:outline-none border-2 border-gray-400 px-4 py-2 rounded  w-44  items-center justify-center">
@@ -203,23 +287,31 @@ export default function Board(props: { id: number }) {
       {loading ? (
         <Loading />
       ) : (
-        <div className="flex mt-5">
-          <DragDropContext onDragEnd={handleDragEnd}>
-            {/* Display all the statuses having the given board id */}
-            {Object.entries(boardStatuses)?.map(([key, status]) => {
-              return (
-                <StatusItem
-                  key={status?.id}
-                  status={status}
-                  dispatch={dispatch}
-                  id={id}
-                  handleDeleteStatusCB={handleDeleteStatus}
-                  handleDescriptionChangeCB={handleDescriptionChange}
-                />
-              );
-            })}
-          </DragDropContext>
-        </div>
+        <>
+          {boardStatuses?.length === 0 ? (
+            <div className="m-5 text-center text-xl font-semibold">
+              No Status Created
+            </div>
+          ) : (
+            <div className="flex mt-5">
+              <DragDropContext onDragEnd={handleDragEnd}>
+                {/* Display all the statuses having the given board id */}
+                {Object.entries(boardStatuses)?.map(([key, status]) => {
+                  return (
+                    <StatusItem
+                      key={status?.id}
+                      status={status}
+                      dispatch={dispatch}
+                      id={id}
+                      handleDeleteStatusCB={handleDeleteStatus}
+                      handleDescriptionChangeCB={handleDescriptionChange}
+                    />
+                  );
+                })}
+              </DragDropContext>
+            </div>
+          )}
+        </>
       )}
 
       <Modal open={showStatusModel} closeCB={() => setShowStatusModel(false)}>

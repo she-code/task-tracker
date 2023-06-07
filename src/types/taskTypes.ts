@@ -13,6 +13,8 @@ export type Task = {
   board_object?: Board;
   status_object?: Status;
   due_date?: string | null;
+  priority?: string;
+  is_completed?: boolean;
 };
 
 export type TaskStateType = {
@@ -24,8 +26,21 @@ export type TaskStateType = {
   description: string;
   status: number;
   due_date?: string | null;
+  priority?: string;
+  is_completed?: boolean;
 };
 
+export type TaskDescriptionType = {
+  description?: string;
+  priority?: string;
+  due_date?: string | null;
+  is_completed?: boolean;
+};
+
+export type UpdateTaskPayload = {
+  taskId: number;
+  taskDescription: TaskDescriptionType;
+};
 export const validateTask = (task: Task) => {
   const { title, description, board, status } = task;
   const errors: Errors<Task> = {};
@@ -46,4 +61,14 @@ export const validateTask = (task: Task) => {
   }
 
   return errors;
+};
+
+export const parseTaskDescription = (desc: string) => {
+  const { priority, description, due_date, is_completed } = JSON.parse(desc);
+  return { priority, description, due_date, is_completed };
+};
+
+export const stringifyTaskDescription = (desc: TaskDescriptionType) => {
+  const { priority, description, due_date, is_completed } = desc;
+  return JSON.stringify({ priority, description, due_date, is_completed });
 };

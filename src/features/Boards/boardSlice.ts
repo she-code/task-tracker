@@ -95,6 +95,9 @@ const boardSlice = createSlice({
         boardStatus.id === id ? { ...boardStatus, tasks: tasks } : boardStatus
       );
     },
+    clearBoardWithStatuses(state) {
+      state.statuses = [];
+    },
   },
   // extraReducers: {
   //   "task/updateTaskSuccess": (state, action) => {
@@ -134,15 +137,15 @@ const boardSlice = createSlice({
         (status) => status.id !== action.payload
       );
     });
+
     builder.addCase(deleteTaskSuccess, (state, action) => {
-      state.statuses = state.statuses.map((status) =>
-        status.id === action.payload
-          ? {
-              ...status,
-              tasks: status.tasks?.filter((task) => task.id !== action.payload),
-            }
-          : status
-      );
+      state.statuses = state.statuses.map((status) => {
+        console.log(status.tasks, "from board slice");
+        return {
+          ...status,
+          tasks: status.tasks?.filter((task) => task.id !== action.payload),
+        };
+      });
     });
   },
 });
@@ -164,4 +167,5 @@ export const {
   resetInputs,
   addStatusesToBoard,
   removeStatusFromBoard,
+  clearBoardWithStatuses,
 } = boardSlice.actions;
