@@ -19,10 +19,9 @@ export default function AppContainer(props: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <div className="max-h-max min-h-screen overflow-y-auto overflow-x-hidden">
-      {/* <div className=" p-4 mx-auto bg-white shadow-lg rounded-xl  w-full px-5"> */}
-      {/* <Header /> */}
+    <div className="max-h-max min-h-screen overflow-y-auto  overflow-x-hidden">
       {window.location.pathname === "/signup" ||
+      window.location.pathname === "*" ||
       window.location.pathname === "/login" ? (
         <></>
       ) : (

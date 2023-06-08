@@ -214,7 +214,11 @@ export default function Board(props: { id: number }) {
               No Status Created
             </div>
           ) : (
-            <div className="flex mt-5">
+            <div
+              className="flex mt-5 max-w-[full] overflow-x-auto  h-screen
+              scrollbar-thin scrollbar-thumb-gray-500  flex-no-wrap
+              scrollbar-track-gray-300 scrollbar-thumb-rounded-full scrollbar-track-rounded-full"
+            >
               <DragDropContext onDragEnd={handleDragEnd}>
                 {/* Display all the statuses having the given board id */}
                 {Object.entries(boardStatuses)?.map(([key, status]) => {

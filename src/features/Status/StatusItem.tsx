@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-import {
-  updateStatusDescAction,
-  updateStatusTitleAction,
-} from "./statusAction";
+import { updateStatusTitleAction } from "./statusAction";
 import { Status } from "../../types/statusTypes";
 import Modal from "../../components/Common/Modal/Modal";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
@@ -39,7 +36,8 @@ const StatusItem = (props: {
       key={status?.id}
       onMouseEnter={() => setShowDeleteBtn(true)}
       onMouseLeave={() => setShowDeleteBtn(false)}
-      className="p-4 bg-white m-3 rounded-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 scrollbar-thumb-rounded-full scrollbar-track-rounded-full max-h-screen w-96 shadow-md min-h-min"
+      className="p-4 bg-white m-3 rounded-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 w-96 
+       scrollbar-track-gray-300 scrollbar-thumb-rounded-full scrollbar-track-rounded-full  shadow-md   flex-shrink-0  h-fit max-h-[90%]"
     >
       <div>
         <div className="flex items-center">
