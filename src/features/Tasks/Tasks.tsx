@@ -16,7 +16,6 @@ export default function Todos() {
   const dispatch = useAppDispacth();
   const boards = useAppSelector((state: RootState) => state.boards.boards);
   const loading = useAppSelector((state: RootState) => state.boards.loading);
-  const error = useAppSelector((state: RootState) => state.boards.error);
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
   const [filterTasks, setFilterTasks] = useState("today");
   const [filterOptions, setFilterOptions] = useState("all");
@@ -72,12 +71,9 @@ export default function Todos() {
   const handleTaskDelete = (taskId: number, boardId: number) => {
     dispatch(deleteTaskAction({ taskId, boardId }));
   };
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
 
   return (
-    <div className=" w-10/12  md:ml-64 mr-5  sm:ml-20">
+    <div className=" w-10/12  mx-auto  ">
       <h1 className="text-3xl font-semibold my-5"> Tasks</h1>
       <div className="flex justify-between items-center">
         <div className="flex  flex-wrap mt-5 ">
@@ -275,36 +271,6 @@ export default function Todos() {
                         />
                       );
                     })}
-
-                {/* {tasks &&
-                  tasks
-                    .filter((task) => {
-                      switch (filterTasks) {
-                        case "all":
-                          return true;
-                        case "today":
-                          return isToday(new Date(task?.due_date || ""));
-                        case "overdue":
-                          return isPast(new Date(task?.due_date || ""));
-                        case "upcoming":
-                          return isFuture(new Date(task?.due_date || ""));
-                        case "noDue":
-                          return !task.due_date;
-                        default:
-                          return true;
-                      }
-                    })
-                    .map((task) => {
-                      return (
-                        <TaskCard
-                          key={task.id}
-                          task={task}
-                          id={task.id as number}
-                          boardId={task.board as number}
-                          handleDeleteTaskActionCB={handleTaskDelete}
-                        />
-                      );
-                    })} */}
               </div>
             )}
           </div>

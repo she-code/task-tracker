@@ -17,7 +17,7 @@ export default function Header(props: {
     setSearchString(e.target.value);
   };
   return (
-    <div className="flex w-full absolute top-0 left-0   justify-between   text-gray-500 h-20 mr-5 bg-white">
+    <div className="flex w-full  top-0 left-0 fixed  justify-between   text-gray-500 h-20 mr-5 bg-white">
       <div
         className={`flex items-center justify-between   w-60 px-2 
        border-b-white border-b-2 ${collapsed ? "bg-white" : "bg-zinc-800"}`}

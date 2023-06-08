@@ -7,6 +7,7 @@ import {
   updateTaskSuccess,
 } from "../Tasks/taskSlice";
 import { deleteStatus, updateStatus } from "../Status/statusSlice";
+import { DropResult } from "@hello-pangea/dnd";
 
 const initialState: BoardStateType = {
   loading: false,
@@ -65,42 +66,48 @@ const boardSlice = createSlice({
       );
     },
 
-    updateTaksOnDnD(state, action) {
+    updateTaksOnDnD(state, action: PayloadAction<DropResult>) {
       const { source, destination } = action.payload;
-
-      const newState = { ...state }; // Create a shallow copy of the state object
-      const sourceStatusIndex = newState.statuses.findIndex(
-        (status) => status.id === parseInt(source.droppableId)
+      // Create a shallow copy of the state object
+      const newState = { ...state };
+      const sourceStatusIndex = newState?.statuses?.findIndex(
+        (status) => status.id === parseInt(source?.droppableId)
       );
 
       if (sourceStatusIndex !== -1) {
-        const sourceStatus = newState.statuses[sourceStatusIndex];
-        const sourceTasks = Array.isArray(sourceStatus.tasks)
+        const sourceStatus = newState?.statuses[sourceStatusIndex];
+        const sourceTasks = Array.isArray(sourceStatus?.tasks)
           ? [...sourceStatus.tasks]
           : [];
 
-        const draggedTask = sourceTasks[source.index];
+        const draggedTask = sourceTasks[source?.index];
         if (draggedTask) {
-          draggedTask.status = parseInt(destination.droppableId);
-          sourceTasks.splice(source.index, 1); // Remove the dragged task from the source tasks
+          draggedTask.status = parseInt(destination?.droppableId as string);
+          // Remove the dragged task from the source tasks
+          sourceTasks.splice(source?.index, 1);
 
-          if (source.droppableId === destination.droppableId) {
+          if (source?.droppableId === destination?.droppableId) {
             // Rearranging within the same status
-            sourceTasks.splice(destination.index, 0, draggedTask); // Insert the dragged task into the new position
+            sourceTasks.splice(destination?.index, 0, draggedTask); // Insert the dragged task into the new position
           } else {
             // Moving to a different status
-            const destinationStatusIndex = newState.statuses.findIndex(
-              (status) => status.id === parseInt(destination.droppableId)
+            const destinationStatusIndex = newState?.statuses?.findIndex(
+              (status) =>
+                status?.id === parseInt(destination?.droppableId as string)
             );
 
             if (destinationStatusIndex !== -1) {
               const destinationStatus =
                 newState.statuses[destinationStatusIndex];
-              const destinationTasks = Array.isArray(destinationStatus.tasks)
+              const destinationTasks = Array.isArray(destinationStatus?.tasks)
                 ? [...destinationStatus.tasks]
                 : [];
 
-              destinationTasks.splice(destination.index, 0, draggedTask); // Insert the dragged task into the destination tasks
+              destinationTasks.splice(
+                destination?.index as number,
+                0,
+                draggedTask
+              ); // Insert the dragged task into the destination tasks
 
               newState.statuses[destinationStatusIndex] = {
                 ...destinationStatus,

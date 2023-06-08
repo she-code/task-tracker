@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { DragDropContext } from "@hello-pangea/dnd";
+import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { debounce } from "lodash";
 
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
@@ -22,6 +22,8 @@ import {
   clearBoardWithStatuses,
   updateTaksOnDnD,
 } from "./boardSlice";
+import { fetchBoard } from "./boardActions";
+import NotFound from "../../components/Common/NotFound/NotFound";
 
 export default function Board(props: { id: number }) {
   const { id } = props;
@@ -33,6 +35,8 @@ export default function Board(props: { id: number }) {
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
   const loading = useAppSelector((state: RootState) => state.tasks.loading);
   const error = useAppSelector((state: RootState) => state.tasks.error);
+  const board = useAppSelector((state: RootState) => state.boards.board);
+
   const boardStatuses = useAppSelector(
     (state: RootState) => state.boards.statuses
   );
@@ -42,43 +46,49 @@ export default function Board(props: { id: number }) {
   );
 
   useEffect(() => {
-    dispatch(fetchTasks(id));
-    dispatch(fetchStatuses());
+    dispatch(fetchBoard(id));
+    if (board) {
+      dispatch(fetchTasks(id));
+      dispatch(fetchStatuses());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, id]);
 
   useEffect(() => {
-    statuses.forEach((status) => {
-      const statusBoardId = status.title.split(":")[1];
+    // Update the board statuses with the tasks
+    board &&
+      statuses?.forEach((status) => {
+        const statusBoardId = status?.title?.split(":")[1];
 
-      if (statusBoardId === id.toString()) {
-        const updatedStatus = { ...status };
-        const statusTasks = tasks.filter(
-          (task) => task?.status_object?.id === status.id
-        );
-        updatedStatus.tasks = statusTasks;
+        if (statusBoardId === id.toString()) {
+          const updatedStatus = { ...status };
+          const statusTasks = tasks.filter(
+            (task) => task?.status_object?.id === status.id
+          );
+          updatedStatus.tasks = statusTasks;
 
-        const existingStatus = boardStatuses.find(
-          (boardStatus) => boardStatus.id === status.id
-        );
-
-        if (!existingStatus) {
-          dispatch(addStatusesToBoard(updatedStatus));
-        } else {
-          const newTasks = statusTasks.filter(
-            (task) =>
-              !existingStatus?.tasks?.find(
-                (existingTask) => existingTask.id === task.id
-              )
+          const existingStatus = boardStatuses.find(
+            (boardStatus) => boardStatus?.id === status?.id
           );
 
-          if (newTasks.length > 0) {
-            dispatch(addTasksToBoard(updatedStatus));
+          if (!existingStatus) {
+            dispatch(addStatusesToBoard(updatedStatus));
+          } else {
+            const newTasks = statusTasks?.filter(
+              (task) =>
+                !existingStatus?.tasks?.find(
+                  (existingTask) => existingTask.id === task.id
+                )
+            );
+
+            if (newTasks.length > 0) {
+              dispatch(addTasksToBoard(updatedStatus));
+            }
           }
+        } else {
+          return;
         }
-      } else {
-        return;
-      }
-    });
+      });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, id, statuses, tasks]);
@@ -96,7 +106,6 @@ export default function Board(props: { id: number }) {
   ) => {
     const newDesc = e.target.value;
     // setStatusDescription(newDesc);
-    console.log("newDesc", newDesc);
     debouncedUpdateStatusDesc(status, newDesc);
   };
   const dispatchUpdateStatusDesc = (statusData: Status, newDesc: string) => {
@@ -117,11 +126,8 @@ export default function Board(props: { id: number }) {
   const handleDeleteStatus = (statusId: number) => {
     dispatch(deleteStatusAction({ statusId }));
   };
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
 
-  const handleDragEnd = async (result: any) => {
+  const handleDragEnd = async (result: DropResult) => {
     const { destination, source } = result;
     if (!destination) return;
     if (
@@ -132,16 +138,12 @@ export default function Board(props: { id: number }) {
     }
 
     // Handle dnd logic
-    dispatch(updateTaksOnDnD({ source, destination }));
+    dispatch(updateTaksOnDnD(result));
 
     const taskToUpdate = boardStatuses?.find(
       (status: Status) => status?.id === parseInt(source?.droppableId)
     )?.tasks?.[source?.index];
-    console.log({
-      taskToUpdate,
-      src: source.droppableId,
-      des: destination.droppableId,
-    });
+
     if (taskToUpdate) {
       const updatedTask = {
         ...taskToUpdate,
@@ -149,20 +151,18 @@ export default function Board(props: { id: number }) {
       };
 
       try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const updatedTaskResponse = await dispatch(
           updateTaskStatusAction({ task: updatedTask, id })
         );
-
-        // dispatch(updateTaskStatus(updatedTaskResponse));
-        console.log({ updatedTaskResponse });
       } catch (error) {
         console.error("Error updating task:", error);
       }
     }
   };
 
-  return (
-    <div className="w-10/12  md:ml-64   sm:ml-20 mr-5 ">
+  return board ? (
+    <div className="w-10/12   mx-auto ">
       <h1 className="text-3xl font-semibold my-5"> My Tasks</h1>
       <div className="flex justify-between">
         <button className="flex focus:outline-none border-2 border-gray-400 px-4 py-2 rounded  w-44  items-center justify-center">
@@ -246,5 +246,7 @@ export default function Board(props: { id: number }) {
         />
       </Modal>
     </div>
+  ) : (
+    <NotFound />
   );
 }

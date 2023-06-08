@@ -28,6 +28,7 @@ export type TaskStateType = {
   due_date?: string | null;
   priority?: string;
   is_completed?: boolean;
+  boardTasks: TaskGroupByBoard[];
 };
 
 export type TaskDescriptionType = {
@@ -35,6 +36,11 @@ export type TaskDescriptionType = {
   priority?: string;
   due_date?: string | null;
   is_completed?: boolean;
+};
+
+export type TaskGroupByBoard = {
+  boardId: number;
+  tasks: Task[];
 };
 
 export type UpdateTaskPayload = {

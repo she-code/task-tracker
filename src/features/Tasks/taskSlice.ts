@@ -1,11 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import {
-  Task,
-  TaskDescriptionType,
-  TaskStateType,
-  UpdateTaskPayload,
-} from "../../types/taskTypes";
+import { Task, TaskStateType, UpdateTaskPayload } from "../../types/taskTypes";
 import { getTaskApi } from "../../utils/apiUtils";
+import { StatusWithTasks } from "../../types/statusTypes";
 
 const initialState: TaskStateType = {
   //   title: "",
@@ -24,19 +20,9 @@ const initialState: TaskStateType = {
   status: 0,
   priority: "low",
   is_completed: false,
-  // due_date: new Date().toISOString().slice(0, 10),
+  boardTasks: [],
 };
-export const fetchTask = createAsyncThunk(
-  "task/fetchTask",
-  async (
-    { boardId, taskId }: { boardId: number; taskId: number },
-    { dispatch }
-  ) => {
-    const response = await getTaskApi(boardId, taskId);
-    // Assuming the response contains the task data
-    return response.task;
-  }
-);
+
 const taskSlice = createSlice({
   name: "task",
   initialState,
@@ -133,7 +119,7 @@ const taskSlice = createSlice({
         taskToUpdate.title = newTitle;
       }
     },
-    updateTaskStatus: (state, action) => {
+    updateTaskStatus: (state, action: PayloadAction<Task>) => {
       const { id, status } = action.payload;
       state.loading = false;
       state.error = null;
@@ -156,14 +142,18 @@ const taskSlice = createSlice({
       state.error = null;
       state.tasks = state.tasks.filter((task) => task.id !== action.payload);
     },
-  },
-  extraReducers: (builder) => {
-    builder.addCase(fetchTask.fulfilled, (state, action) => {
-      state.task = action.payload;
-      // Extract the due date from the fetched task and set it
-      const due_date = action.payload?.title?.split("_")[1]?.trim() || "";
-      state.due_date = due_date;
-    });
+    groupTaskByBoardId(state) {
+      state.loading = false;
+      state.error = null;
+      // state.boardTasks = state.tasks.reduce((acc, task) => {
+      //   const { board } = task;
+      //   if (!acc[board]) {
+      //     acc[board] = [];
+      //   }
+      //   acc[board].push(task);
+      //   return acc;
+      // })
+    },
   },
 });
 
@@ -189,4 +179,5 @@ export const {
   setTaskPriority,
   setTaskCompleted,
   deleteTaskSuccess,
+  groupTaskByBoardId,
 } = taskSlice.actions;
