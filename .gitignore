@@ -5,6 +5,12 @@
 /.pnp
 .pnp.js
 
+/src/Components/*.txt
+/src/features/Boards/*.txt
+/src/features/Tasks/*.txt
+/src/features/Status/*.txt
+
+
 # testing
 /coverage
 

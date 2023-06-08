@@ -167,3 +167,30 @@
         //     ))}
         //   </DragDropContext>
         // </div>
+
+        dnd logic
+
+        
+    // updateTaksOnDnD: (state, action) => {
+    //   const { source, destination } = action.payload;
+
+    //   return produce(state, (draftState) => {
+    //     const sourceStatus = draftState.statuses.find(
+    //       (status) => status.id === parseInt(source.droppableId)
+    //     );
+    //     const draggedTask = sourceStatus?.tasks?.[source.index];
+
+    //     if (draggedTask) {
+    //       draggedTask.status = parseInt(destination.droppableId);
+    //       sourceStatus?.tasks?.splice(source.index, 1); // Remove the dragged task from the source status
+
+    //       const destinationStatus = draftState.statuses.find(
+    //         (status) => status.id === parseInt(destination.droppableId)
+    //       );
+
+    //       if (destinationStatus) {
+    //         destinationStatus?.tasks?.splice(destination.index, 0, draggedTask);
+    //       }
+    //     }
+    //   });
+    // },

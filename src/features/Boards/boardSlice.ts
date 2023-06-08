@@ -1,7 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Board, BoardStateType } from "../../types/boardTypes";
 import { StatusWithTasks } from "../../types/statusTypes";
-import { deleteTaskSuccess, updateTaskSuccess } from "../Tasks/taskSlice";
+import {
+  deleteTaskSuccess,
+  updateTaskStatus,
+  updateTaskSuccess,
+} from "../Tasks/taskSlice";
 import { deleteStatus, updateStatus } from "../Status/statusSlice";
 
 const initialState: BoardStateType = {
@@ -60,6 +64,61 @@ const boardSlice = createSlice({
         board.id === action.payload.id ? action.payload : board
       );
     },
+
+    updateTaksOnDnD(state, action) {
+      const { source, destination } = action.payload;
+
+      const newState = { ...state }; // Create a shallow copy of the state object
+      const sourceStatusIndex = newState.statuses.findIndex(
+        (status) => status.id === parseInt(source.droppableId)
+      );
+
+      if (sourceStatusIndex !== -1) {
+        const sourceStatus = newState.statuses[sourceStatusIndex];
+        const sourceTasks = Array.isArray(sourceStatus.tasks)
+          ? [...sourceStatus.tasks]
+          : [];
+
+        const draggedTask = sourceTasks[source.index];
+        if (draggedTask) {
+          draggedTask.status = parseInt(destination.droppableId);
+          sourceTasks.splice(source.index, 1); // Remove the dragged task from the source tasks
+
+          if (source.droppableId === destination.droppableId) {
+            // Rearranging within the same status
+            sourceTasks.splice(destination.index, 0, draggedTask); // Insert the dragged task into the new position
+          } else {
+            // Moving to a different status
+            const destinationStatusIndex = newState.statuses.findIndex(
+              (status) => status.id === parseInt(destination.droppableId)
+            );
+
+            if (destinationStatusIndex !== -1) {
+              const destinationStatus =
+                newState.statuses[destinationStatusIndex];
+              const destinationTasks = Array.isArray(destinationStatus.tasks)
+                ? [...destinationStatus.tasks]
+                : [];
+
+              destinationTasks.splice(destination.index, 0, draggedTask); // Insert the dragged task into the destination tasks
+
+              newState.statuses[destinationStatusIndex] = {
+                ...destinationStatus,
+                tasks: destinationTasks,
+              }; // Update the destination status tasks
+            }
+          }
+
+          newState.statuses[sourceStatusIndex] = {
+            ...sourceStatus,
+            tasks: sourceTasks,
+          }; // Update the source status tasks
+        }
+      }
+
+      state = newState; // Assign the updated state directly
+    },
+
     requestFailure(state, action: PayloadAction<string>) {
       state.loading = false;
       state.error = action.payload;
@@ -99,21 +158,7 @@ const boardSlice = createSlice({
       state.statuses = [];
     },
   },
-  // extraReducers: {
-  //   "task/updateTaskSuccess": (state, action) => {
-  //     const { statusId, task } = action.payload;
-  //     state.statuses = state.statuses.map((status) =>
-  //       status.id === statusId
-  //         ? {
-  //             ...status,
-  //             tasks: status.tasks?.map((boardTask) =>
-  //               boardTask.id === task.id ? task : boardTask
-  //             ),
-  //           }
-  //         : status
-  //     );
-  //   },
-  // },
+
   extraReducers: (builder) => {
     builder.addCase(updateTaskSuccess, (state, action) => {
       state.statuses = state.statuses.map((status) =>
@@ -147,6 +192,22 @@ const boardSlice = createSlice({
         };
       });
     });
+
+    builder.addCase(updateTaskStatus, (state, action) => {
+      console.log("called");
+      state.loading = false;
+      state.error = null;
+      state.statuses = state?.statuses?.map((status) =>
+        status.id === action.payload?.status_object?.id
+          ? {
+              ...status,
+              tasks: status.tasks?.map((boardTask) =>
+                boardTask.id === action.payload.id ? action.payload : boardTask
+              ),
+            }
+          : status
+      );
+    });
   },
 });
 
@@ -168,4 +229,5 @@ export const {
   addStatusesToBoard,
   removeStatusFromBoard,
   clearBoardWithStatuses,
+  updateTaksOnDnD,
 } = boardSlice.actions;

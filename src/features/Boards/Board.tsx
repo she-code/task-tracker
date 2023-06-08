@@ -4,7 +4,7 @@ import { debounce } from "lodash";
 
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
-import { fetchTasks, updateTaskAction } from "../Tasks/taskActions";
+import { fetchTasks, updateTaskStatusAction } from "../Tasks/taskActions";
 import Loading from "../../components/Common/Loading/Loading";
 import Modal from "../../components/Common/Modal/Modal";
 import CreateStatus from "../Status/CreateStatus";
@@ -14,13 +14,13 @@ import {
   updateStatusDescAction,
 } from "../Status/statusAction";
 import { Status } from "../../types/statusTypes";
-import { updateTaskStatus } from "../Tasks/taskSlice";
 
 import StatusItem from "../Status/StatusItem";
 import {
   addStatusesToBoard,
   addTasksToBoard,
   clearBoardWithStatuses,
+  updateTaksOnDnD,
 } from "./boardSlice";
 
 export default function Board(props: { id: number }) {
@@ -46,66 +46,6 @@ export default function Board(props: { id: number }) {
     dispatch(fetchStatuses());
   }, [dispatch, id]);
 
-  // useEffect(() => {
-  //   statuses.forEach((status) => {
-  //     const statusBoardId = status.title.split(":")[1];
-  //     if (statusBoardId === id.toString()) {
-  //       const updatedStatus = { ...status };
-  //       const statusTasks = tasks.filter(
-  //         (task) => task?.status_object?.id === status.id
-  //       );
-  //       updatedStatus.tasks = statusTasks;
-
-  //       if (
-  //         !boardStatuses.find((boardStatus) => boardStatus.id === status.id)
-  //       ) {
-  //         dispatch(addStatusesToBoard(updatedStatus));
-  //       } else {
-  //         dispatch(addTasksToBoard(updatedStatus));
-  //       }
-  //     }
-  //   });
-
-  //   console.log("updatedStatuses", boardStatuses);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [dispatch, id, statuses, tasks]);
-  // useEffect(() => {
-  //   statuses.forEach((status) => {
-  //     const statusBoardId = status.title.split(":")[1];
-  //     if (statusBoardId === id.toString()) {
-  //       const updatedStatus = { ...status };
-  //       const statusTasks = tasks.filter(
-  //         (task) => task?.status_object?.id === status.id
-  //       );
-  //       updatedStatus.tasks = statusTasks;
-
-  //       const existingStatus = boardStatuses.find(
-  //         (boardStatus) => boardStatus.id === status.id
-  //       );
-
-  //       if (!existingStatus) {
-  //         dispatch(addStatusesToBoard(updatedStatus));
-  //       } else {
-  //         // Check if the updated status has any new tasks
-  //         const newTasks = statusTasks.filter(
-  //           (task) =>
-  //             !existingStatus?.tasks?.find(
-  //               (existingTask) => existingTask.id === task.id
-  //             )
-  //         );
-
-  //         if (newTasks.length > 0) {
-  //           dispatch(addTasksToBoard(updatedStatus));
-  //         }
-  //       }
-  //     } else {
-  //       return;
-  //     }
-  //   });
-  //   console.log("updatedStatuses", boardStatuses);
-
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [dispatch, id, statuses, tasks]);
   useEffect(() => {
     statuses.forEach((status) => {
       const statusBoardId = status.title.split(":")[1];
@@ -180,33 +120,6 @@ export default function Board(props: { id: number }) {
   if (error) {
     return <div>Error: {error}</div>;
   }
-  // const handleDragEnd = (result: any) => {
-  //   const { destination, source } = result;
-  //   if (!destination) return;
-  //   if (
-  //     destination.droppableId === source.droppableId &&
-  //     destination.index === source.index
-  //   ) {
-  //     console.log("same", destination, source);
-  //     return;
-  //   }
-  //   // Handle drag end logic here
-  //   const taskToUpdate = updatedStatuses.find(
-  //     (status: Status) => status?.id === parseInt(source?.droppableId)
-  //   )?.tasks?.[source?.index];
-  //   console.log(result, { taskToUpdate, dec: destination?.droppableId });
-  //   if (taskToUpdate) {
-  //     const updatedTask = {
-  //       id: taskToUpdate.id,
-  //       title: taskToUpdate.title,
-  //       description: taskToUpdate.description,
-  //       status: parseInt(destination?.droppableId),
-  //       board: taskToUpdate.board,
-  //     };
-  //     console.log({ updatedTask });
-  //     dispatch(updateTaskAction({ task: updatedTask, id }));
-  //   }
-  // };
 
   const handleDragEnd = async (result: any) => {
     const { destination, source } = result;
@@ -217,29 +130,37 @@ export default function Board(props: { id: number }) {
     ) {
       return;
     }
-    // Handle drag end logic here
+
+    // Handle dnd logic
+    dispatch(updateTaksOnDnD({ source, destination }));
+
     const taskToUpdate = boardStatuses?.find(
       (status: Status) => status?.id === parseInt(source?.droppableId)
     )?.tasks?.[source?.index];
+    console.log({
+      taskToUpdate,
+      src: source.droppableId,
+      des: destination.droppableId,
+    });
     if (taskToUpdate) {
       const updatedTask = {
-        id: taskToUpdate.id,
-        title: taskToUpdate.title,
-        description: taskToUpdate.description,
+        ...taskToUpdate,
         status: parseInt(destination?.droppableId),
-        board: taskToUpdate.board,
       };
+
       try {
         const updatedTaskResponse = await dispatch(
-          updateTaskAction({ task: updatedTask, id })
+          updateTaskStatusAction({ task: updatedTask, id })
         );
-        // After the update is successful, dispatch an action to update the frontend state with the updated task
-        dispatch(updateTaskStatus(updatedTaskResponse));
+
+        // dispatch(updateTaskStatus(updatedTaskResponse));
+        console.log({ updatedTaskResponse });
       } catch (error) {
         console.error("Error updating task:", error);
       }
     }
   };
+
   return (
     <div className="w-10/12  md:ml-64   sm:ml-20 mr-5 ">
       <h1 className="text-3xl font-semibold my-5"> My Tasks</h1>

@@ -72,25 +72,39 @@ export const fetchTask = createAsyncThunk(
     }
   }
 );
-export const updateTaskAction = createAsyncThunk(
-  "tasks/updateTask",
+// export const updateTaskStatusAction = createAsyncThunk(
+//   "tasks/updateTaskStatus",
+//   async ({ task, id }: { task: Task; id: number }, { dispatch }) => {
+//     try {
+//       // const data: Task = {
+//       //   ...task,
+//       //   status: task?.status_object?.id as number,
+//       // };
+//       const newTask: Task = await updateTaskApi(task, id, task.id as number);
+//       return newTask; // Return the updated task from the action
+//     } catch (error) {
+//       throw error;
+//     }
+//   }
+// );
+export const updateTaskStatusAction = createAsyncThunk(
+  "tasks/updateTaskStatus",
   async ({ task, id }: { task: Task; id: number }, { dispatch }) => {
     try {
-      const data: Task = {
-        id: task.id,
-        title: task.title.concat(" _ ", task.due_date as string),
-        description: task.description,
-        status: task.status,
-        board: task.board,
+      const newTask: Task = await updateTaskApi(task, id, task.id as number);
+
+      // Retrieve the updated task's status ID from the API response
+      const updatedTaskWithStatus = {
+        ...newTask,
+        status: newTask?.status_object?.id,
       };
-      const newTask: Task = await updateTaskApi(data, id, task.id as number);
-      return newTask; // Return the updated task from the action
+
+      return updatedTaskWithStatus; // Return the updated task from the action
     } catch (error) {
       throw error;
     }
   }
 );
-
 export const editTaskAction = createAsyncThunk(
   "tasks/editTask",
   async ({ task, boardId }: { task: Task; boardId: number }, { dispatch }) => {
