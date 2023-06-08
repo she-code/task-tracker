@@ -9,6 +9,7 @@ import { parseTaskDescription } from "../../types/taskTypes";
 import { setTaskFields } from "./taskSlice";
 import Modal from "../../components/Common/Modal/Modal";
 import EditTask from "./EditTask";
+import ModalOpenerBtn from "../../components/Common/Button/ModalOpenerBtn";
 
 export default function Todos() {
   const [showModal, setShowModal] = useState(false);
@@ -74,7 +75,7 @@ export default function Todos() {
 
   return (
     <div className=" w-10/12  mx-auto  ">
-      <h1 className="text-3xl font-semibold my-5"> Tasks</h1>
+      <h1 className="text-3xl font-semibold my-5 text-white"> Tasks</h1>
       <div className="flex justify-between items-center">
         <div className="flex  flex-wrap mt-5 ">
           <select
@@ -107,32 +108,30 @@ export default function Todos() {
         </div>
 
         <div className="flex">
-          <button
-            className="flex focus:outline-none border-2 bg-green-500 text-white px-4 py-3 rounded-md 
-            mr-3 w-44  items-center justify-center text-xl"
-            onClick={() => setShowModal(true)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 6v12m6-6H6"
-              />
-            </svg>
-
-            <span className="text-lg ml-2">Add New</span>
-          </button>
+          <ModalOpenerBtn
+            icon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 6v12m6-6H6"
+                />
+              </svg>
+            }
+            title="Add New"
+            onClickCB={() => setShowModal(true)}
+          />
           <div className="flex">
             <button
               className={`flex focus:outline-none border-2 border-r-0 border-gray-400 px-4 py-2  rounded-r-none items-center justify-center rounded-md ${
-                gridView ? "bg-gray-200" : "bg-white"
+                gridView ? "bg-gray-200" : "bg-glass"
               }`}
               onClick={(_) => setGridView(true)}
             >
@@ -155,7 +154,7 @@ export default function Todos() {
             <button
               className={`flex focus:outline-none border-2 border-l-0 border-gray-400 px-4 py-2
               rounded-l-none  items-center justify-center rounded-md ${
-                gridView ? "bg-white" : "bg-gray-200"
+                gridView ? "bg-glass" : "bg-gray-200"
               }`}
               onClick={(_) => setGridView(false)}
             >
@@ -282,9 +281,9 @@ export default function Todos() {
               <p>No Tasks Created</p>
             ) : (
               <div
-                className={`overflow-x-auto sm:-mx-6 lg:-mx-8  max-h-[90%] overflow-y-auto `}
+                className={`overflow-x-auto sm:-mx-6 lg:-mx-8  max-h-[90%] overflow-y-auto   `}
               >
-                <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+                <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8 bg-glass">
                   <div className="overflow-hidden">
                     <table className="min-w-full text-left text-sm font-light">
                       <thead className="border-b bg-white font-medium">

@@ -6,6 +6,7 @@ import BoardCard from "./BoardCard";
 import Modal from "../../components/Common/Modal/Modal";
 import CreateBoard from "./CreateBoard";
 import Loading from "../../components/Common/Loading/Loading";
+import ModalOpenerBtn from "../../components/Common/Button/ModalOpenerBtn";
 
 const BoardList: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
@@ -42,31 +43,30 @@ const BoardList: React.FC = () => {
       {boards.length > 0 ? (
         <>
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-semibold my-5"> My Boards</h1>
-
-            <button
-              className="flex focus:outline-none border-2  px-4 py-2 rounded-md  w-44 text-white
-          bg-green-500 hover:bg-transparent hover:text-green-500 hover:border-green-500 transition duration-300 ease-in-out 
-           items-center justify-center"
-              onClick={() => setShowModal(true)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 6v12m6-6H6"
-                />
-              </svg>
-
-              <span className="text-lg ml-2">New Board</span>
-            </button>
+            <h1 className="text-3xl font-semibold my-5 text-white">
+              {" "}
+              My Boards
+            </h1>
+            <ModalOpenerBtn
+              icon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6v12m6-6H6"
+                  />
+                </svg>
+              }
+              title="New Board"
+              onClickCB={() => setShowModal(true)}
+            />
           </div>
 
           <div className="flex  flex-wrap mt-5">

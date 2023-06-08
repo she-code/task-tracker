@@ -24,6 +24,7 @@ import {
 } from "./boardSlice";
 import { fetchBoard } from "./boardActions";
 import NotFound from "../../components/Common/NotFound/NotFound";
+import ModalOpenerBtn from "../../components/Common/Button/ModalOpenerBtn";
 
 export default function Board(props: { id: number }) {
   const { id } = props;
@@ -162,9 +163,9 @@ export default function Board(props: { id: number }) {
   };
 
   return board ? (
-    <div className="w-10/12   mx-auto ">
-      <h1 className="text-3xl font-semibold my-5"> My Tasks</h1>
-      <div className="flex justify-between">
+    <div className="w-10/12   mx-auto  overflow-x-auto">
+      <h1 className="text-3xl font-semibold my-5 text-white">{board?.title}</h1>
+      <div className="flex justify-between w-[90%]">
         <button className="flex focus:outline-none border-2 border-gray-400 px-4 py-2 rounded  w-44  items-center justify-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -182,28 +183,27 @@ export default function Board(props: { id: number }) {
           </svg>
           <span className="text-lg ml-2">Filter </span>
         </button>
-        <button
-          className="flex focus:outline-none bg-green-500 text-white px-4 py-2 rounded-lg  w-44 hover:bg-green-600
-            items-center justify-center font-semibold"
-          onClick={() => setShowStatusModel(true)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 6v12m6-6H6"
-            />
-          </svg>
 
-          <span className="text-lg ml-2">Add List</span>
-        </button>
+        <ModalOpenerBtn
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 6v12m6-6H6"
+              />
+            </svg>
+          }
+          title="Add Task"
+          onClickCB={() => setShowStatusModel(true)}
+        />
       </div>
       {loading ? (
         <Loading />
@@ -215,7 +215,7 @@ export default function Board(props: { id: number }) {
             </div>
           ) : (
             <div
-              className="flex mt-5 max-w-[full] overflow-x-auto  h-screen
+              className="flex mt-5 max-w-[full] overflow-x-auto  h-[800px]
               scrollbar-thin scrollbar-thumb-gray-500  flex-no-wrap
               scrollbar-track-gray-300 scrollbar-thumb-rounded-full scrollbar-track-rounded-full"
             >

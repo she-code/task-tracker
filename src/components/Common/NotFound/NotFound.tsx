@@ -1,11 +1,10 @@
 import React from "react";
 
-import notFound from "../../src/notFound.svg";
+import notFound from "../../../notFound.svg";
 export default function NotFound() {
   return (
-    <div>
-      not found
-      <img src={notFound} alt="404" />
+    <div className="flex justify-center items-center h-screen mr-44">
+      <img src={notFound} alt="404" className="" />
     </div>
   );
 }
