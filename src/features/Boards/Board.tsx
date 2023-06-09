@@ -201,7 +201,7 @@ export default function Board(props: { id: number }) {
               />
             </svg>
           }
-          title="Add Task"
+          title="Add List"
           onClickCB={() => setShowStatusModel(true)}
         />
       </div>

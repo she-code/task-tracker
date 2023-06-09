@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useState } from "react";
 import Modal from "../../components/Common/Modal/Modal";
 import EditBoard from "./EditBoard";
@@ -23,10 +23,13 @@ export default function BoardCard(props: {
 
   return (
     <div
-      className={` p-6  rounded-lg shadow-lg m-5   w-80  h-44 ${color} text-white`}
+      className={` p-6  rounded-lg shadow-lg m-5    h-52   bg-white cursor-pointer hover:shadow-xl transition duration-300 ease-in-out ${color}`}
+      onDoubleClick={(_) => navigate(`/boards/${id}`)}
     >
       <div className="flex justify-between">
-        <p className="text-xl font-semibold capitalize">{title}</p>
+        <p className="text-xl font-semibold capitalize text-gray-600">
+          {title}
+        </p>
 
         <div className="relative">
           <button
@@ -40,7 +43,7 @@ export default function BoardCard(props: {
               viewBox="0 0 24 24"
               strokeWidth={2}
               stroke="currentColor"
-              className="w-6 h-6 text-white"
+              className="w-6 h-6 "
             >
               <path
                 strokeLinecap="round"
@@ -51,7 +54,7 @@ export default function BoardCard(props: {
           </button>
 
           {isOpen && (
-            <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-lg flex flex-col  z-10 text-black">
+            <div className="absolute right-0 mt-2 py-2 w-48 bg-violet-400 rounded-md shadow-lg flex flex-col  z-10 text-black">
               <Link
                 href={`/boards/${id}`}
                 className="  px-4 py-2 text-lg font-normal  text-center hover:bg-neutral-100 w-full"
@@ -75,7 +78,7 @@ export default function BoardCard(props: {
         </div>
       </div>
       <div>
-        <p className="text-lg capitalize">{description}</p>
+        <p className="text-lg capitalize text-gray-500">{description}</p>
       </div>
       <Modal open={showEditModal} closeCB={() => setShowEditModal(false)}>
         <EditBoard id={id} handleCloseModal={() => setShowEditModal(false)} />

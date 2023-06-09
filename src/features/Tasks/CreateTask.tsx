@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
 import { Errors } from "../../types/common";
-import { Status } from "../../types/statusTypes";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
 import { setDescription, setDueDate, setPriority, setTitle } from "./taskSlice";
-import { validateTask } from "../../types/taskTypes";
+import { Task, validateTask } from "../../types/taskTypes";
 import { createTask } from "./taskActions";
 
 export default function CreateTask(props: {
@@ -14,7 +13,7 @@ export default function CreateTask(props: {
   handleClose: () => void;
 }) {
   const { boardId, statusId, handleClose } = props;
-  const [errors, setErrors] = useState<Errors<Status>>({});
+  const [errors, setErrors] = useState<Errors<Task>>({});
   const dispatch = useAppDispacth();
   const { title, description, due_date, priority, is_completed } =
     useAppSelector((state: RootState) => state.tasks);

@@ -1,55 +1,111 @@
-import React from "react";
+import React, { useState } from "react";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
 import SubmitBtn from "../../components/Common/Button/SubmitBtn";
+import { useAppDispacth, useAppSelector } from "../../app/hooks";
+import { setEmail, setPassword, setPassword2, setUserName } from "./userSlice";
+import { User, validateSignUpData } from "../../types/userTypes";
+import { Errors } from "../../types/common";
+import { signUpUser } from "./userActions";
 
 export default function SignUp() {
+  const { username, password2, password1, email, error } = useAppSelector(
+    (state) => state.users
+  );
+  const [errors, setErrors] = useState<Errors<User>>({});
+
+  const dispatch = useAppDispacth();
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const validationErrors = validateSignUpData({
+      username,
+      password1,
+      password2,
+      email,
+    });
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length === 0) {
+      dispatch(signUpUser({ username, password1, password2, email }));
+    }
+  };
+
   return (
     <div className="items-center lg:w-1/3 mx-auto mt-20 md:w-1/2 sm:w-full">
-      <h1 className="text-center text-3xl font-semibold">Sign Up</h1>
-      <form action="">
+      <h1 className="text-center text-3xl font-semibold text-white">Sign Up</h1>
+      <form action="" onSubmit={handleSubmit}>
         <div className="p-3">
           <label
             htmlFor="username "
-            className="text-xl font-semibold text-gray-600"
+            className="text-xl font-semibold text-white"
           >
             Username
           </label>
           <CustomInputField
             type="text"
             name="username"
-            value="text"
-            handleInputChangeCB={() => {}}
+            value={username}
+            handleInputChangeCB={(e) => {
+              dispatch(setUserName(e.target.value));
+            }}
           />
+          {errors.username && <p className="text-red-500">{errors.username}</p>}
         </div>
         <div className="p-3">
-          <label htmlFor="name" className="text-xl font-semibold text-gray-600">
-            Name
+          <label htmlFor="email" className="text-xl font-semibold text-white">
+            Email
           </label>
           <CustomInputField
-            type="name"
-            name="name"
-            value="name"
-            handleInputChangeCB={() => {}}
+            type="text"
+            name="email"
+            value={email}
+            handleInputChangeCB={(e) => {
+              dispatch(setEmail(e.target.value));
+            }}
           />
+          {errors.email && <p className="text-red-500">{errors.email}</p>}
         </div>
         <div className="p-3">
           <label
             htmlFor="passwords"
-            className="text-xl font-semibold text-gray-600"
+            className="text-xl font-semibold text-white"
           >
             Password
           </label>
           <CustomInputField
-            type="passwords"
-            name="passwords"
-            value="passwords"
-            handleInputChangeCB={() => {}}
+            type="password"
+            name="password1"
+            value={password1}
+            handleInputChangeCB={(e) => {
+              dispatch(setPassword(e.target.value));
+            }}
           />
+          {errors.password1 && (
+            <p className="text-red-500">{errors.password1}</p>
+          )}
+        </div>
+        <div className="p-3">
+          <label
+            htmlFor="passwords"
+            className="text-xl font-semibold text-white"
+          >
+            Confirm Password
+          </label>
+          <CustomInputField
+            type="password"
+            name="password2"
+            value={password2}
+            handleInputChangeCB={(e) => {
+              dispatch(setPassword2(e.target.value));
+            }}
+          />
+          {errors.password2 && (
+            <p className="text-red-500">{errors.password2}</p>
+          )}
         </div>
         <div className="p-3">
           <SubmitBtn title="Sign Up" />
         </div>
       </form>
+      {error && <p className="text-red-500">{error}</p>}
     </div>
   );
 }

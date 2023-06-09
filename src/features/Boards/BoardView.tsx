@@ -69,7 +69,7 @@ const BoardList: React.FC = () => {
             />
           </div>
 
-          <div className="flex  flex-wrap mt-5">
+          <div className="grid md:grid-cols-3 sm:grid-cols-1  gap-3 mt-5 w-full">
             {boards?.map((board) => (
               <BoardCard
                 key={board.id}

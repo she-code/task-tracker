@@ -223,3 +223,81 @@ export default function EditTask(props: {
     </div>
   );
 }
+
+
+
+
+
+  // useEffect(() => {
+  //   if (boards?.length > 0) {
+  //     const fetchTasksForBoards = async () => {
+  //       const response: Task[] = [];
+  //       for (const board of boards) {
+  //         dispatch(fetchTasks(board.id as number));
+  //         tasks.forEach((task) => {
+  //           if (task.board === board.id) {
+  //             response.push(task);
+  //           }
+  //         });
+  //         // response.push(...tasks);
+  //       }
+  //       setBoardTasks(response);
+  //       console.log({ boardTasks, response });
+  //     };
+
+  //     fetchTasksForBoards();
+  //   }
+  // }, []);
+  // useEffect(() => {
+  //   if (boards?.length > 0) {
+  //     const fetchTasksForBoards = async () => {
+  //       const response: Task[] = [];
+  //       await Promise.all(
+  //         boards.map(async (board) => {
+  //           // await dispatch(fetchTasks(board.id as number));
+  //           const tasks: { results: Task[] } = await getTasks(
+  //             board.id as number
+  //           );
+  //           console.log({ tasks });
+  //           const boardTasks = tasks?.results?.filter(
+  //             (task) => task.board === board.id
+  //           );
+  //           response.push(...boardTasks);
+  //         })
+  //       );
+  //       setBoardTasks(response);
+  //       console.log({ boardTasks, response });
+  //     };
+
+  //     fetchTasksForBoards();
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [boards]);
+
+  // useEffect(() => {
+  //   const updateTaskProperties = () => {
+  //     boardTasks?.forEach((task) => {
+  //       if (task && task.description) {
+  //         const parsedTaskDescription = parseTaskDescription(task.description);
+  //         setBoardTasks((prev) => {
+  //           const index = prev.findIndex((t) => t.id === task.id);
+  //           const newTasks = [...prev];
+  //           newTasks[index] = {
+  //             ...newTasks[index],
+  //             due_date: parsedTaskDescription?.due_date || "",
+  //             is_completed: parsedTaskDescription?.is_completed || false,
+  //             priority: parsedTaskDescription?.priority || "low",
+  //           };
+  //           return newTasks;
+  //         });
+  //         console.log({
+  //           priority: task.priority,
+  //           due_date: task.due_date,
+  //           is_completed: task.is_completed,
+  //         });
+  //       }
+  //     });
+  //   };
+
+  //   updateTaskProperties();
+  // }, []);

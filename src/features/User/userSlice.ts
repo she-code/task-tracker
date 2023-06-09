@@ -9,11 +9,14 @@ const initialState: UserStateType = {
   error: null,
   user: {
     username: "",
-    password: "",
+    password1: "",
+    email: "",
   },
   username: "",
   name: "",
-  password: "",
+  password1: "",
+  email: "",
+  password2: "",
 };
 
 const userSlice = createSlice({
@@ -33,9 +36,32 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    setUserName(state, action: PayloadAction<string>) {
+      state.username = action.payload;
+    },
+    setEmail(state, action: PayloadAction<string>) {
+      state.email = action.payload;
+    },
+    setPassword(state, action: PayloadAction<string>) {
+      state.password1 = action.payload;
+    },
+    setPassword2(state, action: PayloadAction<string>) {
+      state.password2 = action.payload;
+    },
+    addUser(state, action: PayloadAction<User>) {
+      state.users.push(action.payload);
+    },
   },
 });
 export default userSlice.reducer;
 
-export const { getUserSuccess, requestFailure, requestStart } =
-  userSlice.actions;
+export const {
+  getUserSuccess,
+  requestFailure,
+  requestStart,
+  setEmail,
+  setPassword,
+  setPassword2,
+  setUserName,
+  addUser,
+} = userSlice.actions;

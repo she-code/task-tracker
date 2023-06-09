@@ -4,10 +4,8 @@ import { useMatch } from "raviger";
 import { fetchUser } from "../features/User/userActions";
 import { useAppDispacth, useAppSelector } from "../app/hooks";
 import { RootState } from "../app/store";
-import Header from "./Common/Header/Header";
-import Navbar from "./Common/NavBAr";
-import SideBar from "./Common/SideBar";
-import Sidebar from "./Sidebar";
+
+import Sidebar from "./Common/SideBar/Sidebar";
 
 import bgImg from "../../src/background.jpg";
 export default function AppContainer(props: {
@@ -17,7 +15,6 @@ export default function AppContainer(props: {
 }) {
   const dispatch = useAppDispacth();
   const user = useAppSelector((state: RootState) => state.users.user);
-  const { collapsed, toggleSidebar } = props;
   useEffect(() => {
     dispatch(fetchUser());
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -33,7 +30,7 @@ export default function AppContainer(props: {
       style={{ backgroundImage: `url(${bgImg})` }}
     >
       {matchBoards || matchBoard || matchTasks || matchHome ? (
-        <Sidebar />
+        <Sidebar user={user} />
       ) : (
         // <div className="">
         // {/*

@@ -1,6 +1,7 @@
 import React from "react";
-const UserProfile = (props: { toggle: boolean }) => {
-  const { toggle } = props;
+import { User } from "../../types/userTypes";
+const UserProfile = (props: { toggle: boolean; user: User }) => {
+  const { toggle, user } = props;
   return (
     <div
       className={`flex gap-5 items-center mb-10 ${
@@ -17,8 +18,8 @@ const UserProfile = (props: { toggle: boolean }) => {
         />
       </div>
       <div className={toggle ? "opacity-0 delay-200" : ""}>
-        <h3 className="text-xl">Abee Zarar</h3>
-        <span className="text-[0.75rem] opacity-60">abee2002@gmail.com</span>
+        <h3 className="text-xl">{user?.name ? user.name : user?.username}</h3>
+        <span className="text-[0.75rem] opacity-60">{user?.email ?? ""}</span>
       </div>
     </div>
   );
