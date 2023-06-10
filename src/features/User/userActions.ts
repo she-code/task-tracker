@@ -1,6 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getUserSuccess, requestFailure } from "./userSlice";
-import { me, register } from "../../utils/apiUtils";
+import {
+  getUserSuccess,
+  logoutSucces,
+  requestFailure,
+  requestStart,
+} from "./userSlice";
+import { logout, me, register } from "../../utils/apiUtils";
 import { User } from "../../types/userTypes";
 import { navigate } from "raviger";
 
@@ -8,7 +13,7 @@ export const fetchUser = createAsyncThunk(
   "users/fetchUser",
   async (_, { dispatch }) => {
     try {
-      // dispatch(requestStart());
+      dispatch(requestStart());
       const user = await me();
       dispatch(getUserSuccess(user));
     } catch (error) {
@@ -29,6 +34,23 @@ export const signUpUser = createAsyncThunk(
         console.log("response", response);
         navigate("/login");
       }
+    } catch (error) {
+      dispatch(requestFailure((error as string).toString()));
+    }
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  "users/logoutUser",
+  async (_, { dispatch }) => {
+    try {
+      // dispatch(requestStart());
+      // localStorage.removeItem("token");
+      // navigate("/login");
+      await logout();
+      dispatch(logoutSucces());
+      localStorage.removeItem("token");
+      navigate("/login");
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));
     }

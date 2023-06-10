@@ -3,7 +3,7 @@ import UserProfile from "../../../features/User/UserProfile";
 import SidebarData from "./SideBarData";
 import { User } from "../../../types/userTypes";
 
-export default function Sidebar(props: { user: User }) {
+export default function Sidebar(props: { user: User | null }) {
   const [toggle, setToggle] = useState(false);
   return (
     <div
@@ -11,7 +11,7 @@ export default function Sidebar(props: { user: User }) {
         toggle ? "w-[5.8rem]" : ""
       }   bg-glass mt-2 p-4 border h-[96%] w-[20rem] rounded-3xl ml-6 transition-all duration-500 border-glass relative `}
     >
-      <UserProfile toggle={toggle} user={props.user} />
+      <UserProfile toggle={toggle} user={props.user as User} />
       <SidebarData toggle={toggle} />
       <div className="absolute top-[7rem] flex justify-center items-center -left-5 w-10 h-10 bg-glass rounded-full cursor-pointer">
         <button onClick={() => setToggle(!toggle)}>

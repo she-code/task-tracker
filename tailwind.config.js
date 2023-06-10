@@ -8,6 +8,8 @@ module.exports = {
         todoBackground: "#f1f2f4",
         glass: "rgba(255,255,255,0.25)",
         brown: "rgb(30,30,17)",
+        customPurple: "#572ba7",
+        customPink: "#c3449d",
       },
       boxShadow: {
         custom: "0px 0px 5px #fff",

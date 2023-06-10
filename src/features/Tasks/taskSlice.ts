@@ -1,7 +1,5 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Task, TaskStateType, UpdateTaskPayload } from "../../types/taskTypes";
-import { getTaskApi } from "../../utils/apiUtils";
-import { StatusWithTasks } from "../../types/statusTypes";
 
 const initialState: TaskStateType = {
   //   title: "",

@@ -1,4 +1,3 @@
-import { isVisible } from "@testing-library/user-event/dist/utils";
 import React, { useState } from "react";
 import Modal from "../../components/Common/Modal/Modal";
 import EditTask from "./EditTask";

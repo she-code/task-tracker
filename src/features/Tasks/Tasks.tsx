@@ -10,6 +10,10 @@ import { setTaskFields } from "./taskSlice";
 import Modal from "../../components/Common/Modal/Modal";
 import EditTask from "./EditTask";
 import ModalOpenerBtn from "../../components/Common/Button/ModalOpenerBtn";
+import Loading from "../../components/Common/Loading/Loading";
+import CreateTaskWithOptions from "./CreateTaskWithOption";
+import { getAuthToken } from "../../utils/storageUtils";
+import { navigate } from "raviger";
 
 export default function Todos() {
   const [showModal, setShowModal] = useState(false);
@@ -22,7 +26,14 @@ export default function Todos() {
   const [filterOptions, setFilterOptions] = useState("all");
   const [description, setDescription] = useState("");
   const [boardId, setBoardId] = useState(boards[0]?.id || 0);
+  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
 
+  useEffect(() => {
+    if (getAuthToken() === null) {
+      navigate("/login");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     dispatch(fetchBoards()).then(() => {
       setBoardId(boards[0]?.id || 0);
@@ -77,11 +88,11 @@ export default function Todos() {
     <div className=" w-10/12  mx-auto  ">
       <h1 className="text-3xl font-semibold my-5 text-white"> Tasks</h1>
       <div className="flex justify-between items-center">
-        <div className="flex  flex-wrap mt-5 ">
+        <div className="flex  flex-wrap">
           <select
             aria-label="Filter Tasks"
             title="Filter Tasks"
-            className="p-5 focus:outline-none  mr-5 focus:border-l-green-500 focus:border-l-4 py-2 text-lg font-semibold"
+            className=" focus:outline-none px-4 py-4 mr-5 focus:border-l-green-500 focus:border-l-4  text-lg font-semibold rounded-md"
             onChange={(e) => setFilterTasks(e.target.value)}
           >
             <option value="today">Today</option>
@@ -90,7 +101,7 @@ export default function Todos() {
             <option value="noDue">No Due Date</option>
           </select>
           <select
-            className="p-5 focus:outline-none   focus:border-l-green-500 focus:border-l-4 py-2 text-lg  font-semibold"
+            className="p-5 focus:outline-none  px-4 py-4 focus:border-l-green-500 focus:border-l-4 text-lg  font-semibold rounded-md"
             onChange={(e) => setFilterOptions(e.target.value)}
             aria-label="Filter Options"
             title="Filter Options"
@@ -126,9 +137,9 @@ export default function Todos() {
               </svg>
             }
             title="Add New"
-            onClickCB={() => setShowModal(true)}
+            onClickCB={() => setShowCreateTaskModal(true)}
           />
-          <div className="flex">
+          <div className="flex ml-5">
             <button
               className={`flex focus:outline-none border-2 border-r-0 border-gray-400 px-4 py-2  rounded-r-none items-center justify-center rounded-md ${
                 gridView ? "bg-gray-200" : "bg-glass"
@@ -178,16 +189,19 @@ export default function Todos() {
       </div>
       <div className="flex  flex-wrap mt-5">
         {boards?.length === 0 ? (
-          <div>No Boards are Created</div>
+          <div className="mt-6 text-white text-lg">No Boards are Created</div>
         ) : (
           <div className="flex items-center">
-            <label className="mr-2 text-xl font-semibold" htmlFor="selectBoard">
+            <label
+              className="mr-2 text-xl font-semibold text-white"
+              htmlFor="selectBoard"
+            >
               Board:{" "}
             </label>
             <select
               aria-label="Select Board"
               title="selectBoard"
-              className="px-2 focus:outline-none font-light  focus:border-l-green-500 focus:border-l-4 py-2"
+              className="px-4 py-4 focus:outline-none font-light  focus:border-l-green-500 focus:border-l-4 rounded-md"
               onChange={(e) => setBoardId(Number(e.target.value))}
               value={boardId}
             >
@@ -202,11 +216,13 @@ export default function Todos() {
       </div>
       <div>
         {loading ? (
-          <div>loading</div>
+          <Loading />
         ) : gridView ? (
           <div>
             {tasks.length === 0 ? (
-              <p>No tasks created</p>
+              <p className="text-white text-lg mt-5 text-center">
+                No tasks created
+              </p>
             ) : (
               <div className="grid md:grid-cols-3 gap-4 mt-5 sm:grid-cols-1">
                 {tasks &&
@@ -274,16 +290,18 @@ export default function Todos() {
             )}
           </div>
         ) : loading ? (
-          <div>loading</div>
+          <Loading />
         ) : (
           <div className="flex flex-col mt-5">
             {tasks.length === 0 ? (
-              <p>No Tasks Created</p>
+              <p className="mt-6 text-lg text-white text-center">
+                No Tasks Created
+              </p>
             ) : (
               <div
                 className={`overflow-x-auto sm:-mx-6 lg:-mx-8  max-h-[90%] overflow-y-auto   `}
               >
-                <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8 bg-glass">
+                <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8 ">
                   <div className="overflow-hidden">
                     <table className="min-w-full text-left text-sm font-light">
                       <thead className="border-b bg-white font-medium">
@@ -314,7 +332,7 @@ export default function Todos() {
                           </th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="bg-glass">
                         {tasks &&
                           tasks
                             .filter((task) => {
@@ -365,37 +383,47 @@ export default function Todos() {
                             })
                             .map((task, index) => (
                               <tr
-                                className="border-b bg-neutral-100"
-                                key={task.id}
+                                className="border-b  even:hover:bg-neutral-100 odd:hover:bg-slate-400 cursor-pointer"
+                                key={task?.id}
                               >
                                 <td className="whitespace-nowrap px-6 py-4 font-medium">
                                   <p>{index + 1}</p>
                                 </td>
                                 <td
                                   className={`whitespace-nowrap px-6 py-4  text-lg capitalize ${
-                                    task.is_completed
+                                    task?.is_completed
                                       ? "line-through"
                                       : "no-underline"
                                   }`}
                                 >
-                                  <p>{task.title}</p>
+                                  <p>{task?.title}</p>
                                 </td>
                                 <td className="whitespace-nowrap px-6 py-4 text-lg first-letter:capitalize">
                                   <p>{description}</p>
                                 </td>
                                 <td className="whitespace-nowrap px-6 py-4 text-lg first-letter:capitalize">
-                                  <p>{task.priority}</p>
+                                  <p>{task?.priority}</p>
                                 </td>
                                 <td className="whitespace-nowrap px-6 py-4 text-lg capitalize">
                                   <p>
-                                    {task.status_object?.title?.split(":")[0]}
+                                    {task?.status_object?.title?.split(":")[0]}
                                   </p>
                                 </td>
                                 <td className="whitespace-nowrap px-6 py-4 text-lg">
-                                  <p>{task.created_date?.split("T")[0]}</p>
+                                  <p>{task?.created_date?.split("T")[0]}</p>
                                 </td>
                                 <td className="whitespace-nowrap px-6 py-4 text-lg first-letter:capitalize">
-                                  <p>{task.due_date}</p>
+                                  <p>
+                                    {
+                                      new Date(task?.due_date as string)
+                                        .toISOString()
+                                        .split("T")[0]
+                                    }{" "}
+                                    at{" "}
+                                    {new Date(
+                                      task?.due_date as string
+                                    ).toLocaleTimeString()}
+                                  </p>
                                 </td>
                                 <td className="whitespace-nowrap px-6 py-4 text-lg">
                                   <div className="flex justify-between">
@@ -465,6 +493,14 @@ export default function Todos() {
           </div>
         )}
       </div>
+      <Modal
+        open={showCreateTaskModal}
+        closeCB={() => setShowCreateTaskModal(false)}
+      >
+        <CreateTaskWithOptions
+          handleClose={() => setShowCreateTaskModal(false)}
+        />
+      </Modal>
     </div>
   );
 }

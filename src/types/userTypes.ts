@@ -14,7 +14,7 @@ export type UserStateType = {
   loading: boolean;
   users: User[];
   error: string | null;
-  user: User;
+  user: User | null;
   username: string;
   name: string;
   password1: string;

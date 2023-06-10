@@ -9,15 +9,26 @@ import HomeItem from "./HomeItem";
 import { getTasks } from "../../utils/apiUtils";
 import DoughnutChart from "../../components/Common/Chart/Doughnut";
 import PriorityChart from "../../components/Common/Chart/PriorityChart";
+import Loading from "../../components/Common/Loading/Loading";
+import { getAuthToken } from "../../utils/storageUtils";
+import { navigate } from "raviger";
 
 export default function Home() {
   const user = useAppSelector((state: RootState) => state.users.user);
+  const loading = useAppSelector((state: RootState) => state.users.loading);
   const boards = useAppSelector((state: RootState) => state.boards.boards);
   const status = useAppSelector((state: RootState) => state.statuses.statuses);
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
   const [boardTasks, setBoardTasks] = useState<Task[]>([]);
 
   const dispatch = useAppDispacth();
+
+  useEffect(() => {
+    if (getAuthToken() === null) {
+      navigate("/login");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     dispatch(fetchBoards());
     dispatch(fetchStatuses());
@@ -63,7 +74,9 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boards, tasks]);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <div className=" w-10/12   mx-auto">
       <p className="text-xl  text-white mt-3">
         {format(new Date(), "EEEE, MMMM d")}

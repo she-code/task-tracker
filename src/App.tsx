@@ -7,6 +7,7 @@ function App() {
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
+
   return (
     <div className="App bg-customBackground  m-0">
       <AppRouter collapsed={collapsed} toggleCollapsedCB={toggleSidebar} />

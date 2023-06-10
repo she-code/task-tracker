@@ -25,6 +25,8 @@ import {
 import { fetchBoard } from "./boardActions";
 import NotFound from "../../components/Common/NotFound/NotFound";
 import ModalOpenerBtn from "../../components/Common/Button/ModalOpenerBtn";
+import { getAuthToken } from "../../utils/storageUtils";
+import { navigate } from "raviger";
 
 export default function Board(props: { id: number }) {
   const { id } = props;
@@ -35,7 +37,7 @@ export default function Board(props: { id: number }) {
 
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
   const loading = useAppSelector((state: RootState) => state.tasks.loading);
-  const error = useAppSelector((state: RootState) => state.tasks.error);
+  // const error = useAppSelector((state: RootState) => state.tasks.error);
   const board = useAppSelector((state: RootState) => state.boards.board);
 
   const boardStatuses = useAppSelector(
@@ -45,7 +47,12 @@ export default function Board(props: { id: number }) {
   const statuses = useAppSelector(
     (state: RootState) => state.statuses.statuses
   );
-
+  useEffect(() => {
+    if (getAuthToken() === null) {
+      navigate("/login");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     dispatch(fetchBoard(id));
     if (board) {

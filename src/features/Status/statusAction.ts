@@ -14,7 +14,6 @@ import {
   requestStart,
   updateStatus,
 } from "./statusSlice";
-import { removeStatusFromBoard } from "../Boards/boardSlice";
 
 export const createStatus = createAsyncThunk(
   "status/createStatus",

@@ -2,6 +2,7 @@ import { navigate } from "raviger";
 import React, { useState, useEffect } from "react";
 import { login } from "../../utils/apiUtils";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
+import SubmitBtn from "../../components/Common/Button/SubmitBtn";
 
 export default function Login() {
   const [username, setUserName] = useState("");
@@ -24,20 +25,22 @@ export default function Login() {
   }, []);
 
   return (
-    <div className="   align-middle">
-      <form onSubmit={handleSubmit} className="w-1/2 mx-auto">
-        <div className="p-2  ">
-          <div className="flex items-center justify-between">
-            <label htmlFor="username" className="text-lg font-semibold mr-2">
-              Username
-            </label>
-            <CustomInputField
-              handleInputChangeCB={(e) => setUserName(e.target.value)}
-              type="text"
-              value={username}
-              name="username"
-            />
-          </div>
+    <div className="items-center lg:w-1/3 mx-auto mt-20 md:w-1/2 sm:w-full">
+      <h1 className="text-center text-3xl font-semibold text-white">SIGN IN</h1>{" "}
+      <form onSubmit={handleSubmit}>
+        <div className="p-3  ">
+          <label
+            htmlFor="username"
+            className="text-white text-lg font-semibold mr-2"
+          >
+            Username
+          </label>
+          <CustomInputField
+            handleInputChangeCB={(e) => setUserName(e.target.value)}
+            type="text"
+            value={username}
+            name="username"
+          />
         </div>
         {/* <div className="p-2  ">
           <div className="flex items-center justify-between">
@@ -53,24 +56,22 @@ export default function Login() {
           </div> */}
         {/* </div> */}
         <div className="p-2  ">
-          <div className="flex items-center">
-            <label htmlFor="password" className="text-lg font-semibold mr-2">
-              Password
-            </label>
-            <CustomInputField
-              handleInputChangeCB={(e) => setPassword(e.target.value)}
-              type="password"
-              name="password"
-              value={password}
-            />
-          </div>
+          <label
+            htmlFor="password"
+            className="text-lg font-semibold mr-2 text-white"
+          >
+            Password
+          </label>
+          <CustomInputField
+            handleInputChangeCB={(e) => setPassword(e.target.value)}
+            type="password"
+            name="password"
+            value={password}
+          />
         </div>
-        <button
-          type="submit"
-          className="bg-green-600 rounded py-2 px-3 w-1/3 mx-auto text-white "
-        >
-          Submit
-        </button>
+        <div className="p-3">
+          <SubmitBtn title="Sign In" />
+        </div>
       </form>
     </div>
   );

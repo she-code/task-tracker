@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
 import SubmitBtn from "../../components/Common/Button/SubmitBtn";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
@@ -6,6 +6,7 @@ import { setEmail, setPassword, setPassword2, setUserName } from "./userSlice";
 import { User, validateSignUpData } from "../../types/userTypes";
 import { Errors } from "../../types/common";
 import { signUpUser } from "./userActions";
+import { navigate } from "raviger";
 
 export default function SignUp() {
   const { username, password2, password1, email, error } = useAppSelector(
@@ -14,6 +15,12 @@ export default function SignUp() {
   const [errors, setErrors] = useState<Errors<User>>({});
 
   const dispatch = useAppDispacth();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/");
+    }
+  }, []);
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationErrors = validateSignUpData({
@@ -30,7 +37,7 @@ export default function SignUp() {
 
   return (
     <div className="items-center lg:w-1/3 mx-auto mt-20 md:w-1/2 sm:w-full">
-      <h1 className="text-center text-3xl font-semibold text-white">Sign Up</h1>
+      <h1 className="text-center text-3xl font-semibold text-white">SIGN UP</h1>
       <form action="" onSubmit={handleSubmit}>
         <div className="p-3">
           <label

@@ -77,9 +77,13 @@ export const me = () => {
 export const addUser = (user: User) => {
   return request("users/", "POST", user);
 };
+export const logout = () => {
+  return request("auth/logout/", "POST", {});
+};
+
 /**Boards */
-export const getBoards = () => {
-  return request("boards/", "GET", {});
+export const getBoards = (pageParams?: PaginationParams) => {
+  return request("boards/", "GET", pageParams);
 };
 
 export const createBoard = (board: Board) => {

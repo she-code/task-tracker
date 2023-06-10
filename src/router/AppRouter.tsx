@@ -24,7 +24,9 @@ export default function AppRouter(props: {
     "/tasks": () => <Todos />,
     "*": () => <NotFound />,
   };
+
   let routeResult = useRoutes(routes);
+  // useAuthentication();
   const { collapsed, toggleCollapsedCB } = props;
   return (
     <AppContainer collapsed={collapsed} toggleSidebar={toggleCollapsedCB}>
