@@ -48,7 +48,7 @@ const SidebarData = (props: { toggle: boolean }) => {
             aria-label={link.page}
             href={link.url}
             key={link.page}
-            exactActiveClass="text-green-500"
+            exactActiveClass="text-green-500 bg-white"
             className={`
             p-4 text-xl 
             ${
@@ -70,7 +70,9 @@ const SidebarData = (props: { toggle: boolean }) => {
             tabIndex={0}
             aria-label={link.page}
             onClick={link.onclick}
-            className={`p-3  w-5/6 text-lg mx-2 justify-center focus:outline-none  text-white whitespace-pre
+            className={`p-3  text-lg mx-2 justify-center focus:outline-none  text-white whitespace-pre ${
+              toggle ? "w-[3.6rem]" : "w-[14rem]"
+            }
             flex items-center mt-2 rounded-lg cursor-pointer hover:bg-white transition all bg-customPink hover:text-brown
              duration-300 absolute left-4 bottom-4`}
           >

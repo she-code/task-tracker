@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "../../components/Common/Modal/Modal";
 import EditTask from "./EditTask";
-import { Task } from "../../types/taskTypes";
+import { Task, parseTaskDescription } from "../../types/taskTypes";
 import { DraggableProvided } from "@hello-pangea/dnd";
+import DeleteIcon from "../../components/Common/Icons/DeleteIcon";
+import EditIcon from "../../components/Common/Icons/EditIcon";
+import CheckIcon from "../../components/Common/Icons/CheckIcon";
+import { deleteTaskAction } from "./taskActions";
+import { useAppDispacth } from "../../app/hooks";
 
 export default function TaskCard1(props: {
   task: Task;
@@ -14,9 +19,30 @@ export default function TaskCard1(props: {
   const [showEditTaskModel, setShowEditTaskModel] = useState(false);
   const { task, boardId, provided, isVisible, setTaskVisibility } = props;
   const taskId = task.id?.toString() || "";
+  const [priority, setPriority] = useState<string>("");
+  const [is_completed, setIsCompleted] = useState<boolean>(false);
+  const dispatch = useAppDispacth();
+
+  useEffect(() => {
+    if (task && task?.description) {
+      setPriority(parseTaskDescription(task?.description)?.priority);
+      setIsCompleted(parseTaskDescription(task?.description)?.is_completed);
+    }
+  }, [task]);
+
+  const handleDeleteTask = () => {
+    dispatch(deleteTaskAction({ taskId: task?.id as number, boardId }));
+  };
   return (
     <div
-      className="bg-gray-100 p-2 my-2 rounded-md flex justify-between items-center"
+      className={` bg-gray-100 p-2 my-2 rounded-md flex justify-between items-center
+       ${
+         priority === "high"
+           ? "border-b-2 border-red-500"
+           : task?.priority === "medium"
+           ? "border-b-2 border-yellow-500"
+           : "border-b-2 border-green-500"
+       }`}
       ref={provided.innerRef}
       {...provided.draggableProps}
       {...provided.dragHandleProps}
@@ -36,30 +62,32 @@ export default function TaskCard1(props: {
         }));
       }}
     >
-      <p>{task.title.split("_")[0]}</p>
-      <button
-        className={`focus:outline-none ${
-          isVisible ? "block" : "hidden"
-        } hover:bg-gray-200 rounded py-1 px-2`}
-        onClick={() => {
-          setShowEditTaskModel(true);
-        }}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-6 h-5"
+      <p className="flex">
+        {" "}
+        <span className="mr-2 inline">{is_completed ? <CheckIcon /> : ""}</span>
+        {task.title.split("_")[0]}
+      </p>
+      <div className="flex">
+        <button
+          className={`focus:outline-none ${
+            isVisible ? "block" : "hidden"
+          } hover:bg-gray-200 rounded py-1 px-2`}
+          onClick={() => {
+            setShowEditTaskModel(true);
+          }}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
-          />
-        </svg>
-      </button>
+          <EditIcon />
+        </button>
+        <button
+          className={`focus:outline-none ${
+            isVisible ? "block" : "hidden"
+          } hover:bg-gray-200 rounded py-1 px-2`}
+          onClick={handleDeleteTask}
+        >
+          <DeleteIcon />
+        </button>
+      </div>
+
       <Modal
         open={showEditTaskModel}
         closeCB={() => setShowEditTaskModel(false)}

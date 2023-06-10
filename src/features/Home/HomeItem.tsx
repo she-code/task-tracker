@@ -1,6 +1,9 @@
 import React from "react";
 
-export default function HomeItem(props: { title: string; count: number }) {
+export default function HomeItem(props: {
+  title: string;
+  count: number | string;
+}) {
   const { title, count } = props;
   return (
     <div className="bg-white shadow-xl rounded-lg p-5 mt-5 flex flex-col justify-center items-center  h-52">

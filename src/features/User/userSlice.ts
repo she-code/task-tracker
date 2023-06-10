@@ -56,6 +56,9 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = null;
     },
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.loading = action.payload;
+    },
   },
 });
 export default userSlice.reducer;
@@ -66,6 +69,7 @@ export const {
   requestStart,
   setEmail,
   setPassword,
+  setLoading,
   setPassword2,
   setUserName,
   addUser,

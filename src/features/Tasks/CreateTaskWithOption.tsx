@@ -14,6 +14,12 @@ export default function CreateTaskWithOptions(props: {
 }) {
   const { handleClose } = props;
   const [errors, setErrors] = useState<Errors<Task>>({});
+
+  const boards = useAppSelector((state: RootState) => state.boards.boards);
+  const [statusId, setStatusId] = useState(0);
+
+  const [boardId, setBoardId] = useState(0);
+
   const statuses = useAppSelector(
     (state: RootState) => state.statuses.statuses
   );
@@ -94,7 +100,7 @@ export default function CreateTaskWithOptions(props: {
             <p className="text-red-500">{errors.description}</p>
           )}
         </div>
-        <div className="p-2  ">
+        <div className="p-2 flex ">
           <div className="flex items-center">
             <label
               htmlFor="priority"
@@ -112,6 +118,48 @@ export default function CreateTaskWithOptions(props: {
                 <option value="high">High</option>
               </select>
             </div>
+          </div>
+          <div className="flex items-center">
+            <label
+              className="mr-2 text-xl font-semibold text-black"
+              htmlFor="selectBoard"
+            >
+              Board
+            </label>
+            <select
+              aria-label="Select Board"
+              title="selectBoard"
+              className="px-4 py-4 focus:outline-none font-light  focus:border-l-green-500 focus:border-l-4 rounded-md"
+              onChange={(e) => setBoardId(Number(e.target.value))}
+              value={boardId}
+            >
+              {boards?.map((board) => (
+                <option value={board.id} key={board.id}>
+                  {board.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center">
+            <label
+              className="mr-2 text-xl font-semibold text-black"
+              htmlFor="selectStatus"
+            >
+              Status
+            </label>
+            <select
+              aria-label="Select Statustatus"
+              title="selectStatus"
+              className="px-4 py-4 focus:outline-none font-light  focus:border-l-green-500 focus:border-l-4 rounded-md"
+              onChange={(e) => setStatusId(Number(e.target.value))}
+              value={statusId}
+            >
+              {statuses?.map((status) => (
+                <option value={status.id} key={status.id}>
+                  {status.title}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="p-2  ">

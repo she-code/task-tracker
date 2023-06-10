@@ -12,6 +12,7 @@ import PriorityChart from "../../components/Common/Chart/PriorityChart";
 import Loading from "../../components/Common/Loading/Loading";
 import { getAuthToken } from "../../utils/storageUtils";
 import { navigate } from "raviger";
+import { is } from "date-fns/locale";
 
 export default function Home() {
   const user = useAppSelector((state: RootState) => state.users.user);
@@ -19,6 +20,8 @@ export default function Home() {
   const boards = useAppSelector((state: RootState) => state.boards.boards);
   const status = useAppSelector((state: RootState) => state.statuses.statuses);
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [boardTasks, setBoardTasks] = useState<Task[]>([]);
 
   const dispatch = useAppDispacth();
@@ -39,34 +42,41 @@ export default function Home() {
   useEffect(() => {
     if (boards?.length > 0) {
       const fetchTasksForBoards = async () => {
-        const response: Task[] = [];
-        await Promise.all(
-          boards.map(async (board) => {
-            const tasks: { results: Task[] } = await getTasks(
-              board.id as number
-            );
-            const boardTasks = tasks?.results?.filter(
-              (task) => task.board === board.id
-            );
-            const updatedTasks = boardTasks?.map((task) => {
-              if (task.description) {
-                const parsedTaskDescription = parseTaskDescription(
-                  task.description
-                );
-                return {
-                  ...task,
-                  due_date: parsedTaskDescription?.due_date || "",
-                  is_completed: parsedTaskDescription?.is_completed || false,
-                  priority: parsedTaskDescription?.priority || "low",
-                };
-              }
-              return task;
-            });
-            response.push(...updatedTasks);
-          })
-        );
-        setBoardTasks(response);
-        console.log({ boardTasks: response });
+        try {
+          const response: Task[] = [];
+          await Promise.all(
+            boards.map(async (board) => {
+              const tasks: { results: Task[] } = await getTasks(
+                board.id as number
+              );
+              const boardTasks = tasks?.results?.filter(
+                (task) => task.board === board.id
+              );
+              const updatedTasks = boardTasks?.map((task) => {
+                if (task.description) {
+                  const parsedTaskDescription = parseTaskDescription(
+                    task.description
+                  );
+                  return {
+                    ...task,
+                    due_date: parsedTaskDescription?.due_date || "",
+                    is_completed: parsedTaskDescription?.is_completed || false,
+                    priority: parsedTaskDescription?.priority || "low",
+                  };
+                }
+                return task;
+              });
+              response.push(...updatedTasks);
+            })
+          );
+          setBoardTasks(response);
+          setIsLoading(false);
+          console.log({ boardTasks: response });
+        } catch (error) {
+          console.error("Error fetching tasks for boards:", error);
+
+          setIsLoading(false);
+        }
       };
 
       fetchTasksForBoards();
@@ -85,14 +95,20 @@ export default function Home() {
         Welcome, {user?.name ? user.name : user?.username}
       </h1>
       <div className="grid md:grid-cols-2 sm:grid-cols-1  gap-4 lg:grid-cols-3 my-6">
-        <HomeItem title="Boards" count={boards?.length ?? 0} />
-        <HomeItem title="Statuses" count={status?.length ?? 0} />
-        <HomeItem title="Total Tasks" count={boardTasks.length ?? 0} />
+        <HomeItem title="Boards" count={(boards?.length as number) ?? 0} />
+        <HomeItem title="Statuses" count={(status?.length as number) ?? 0} />
+
+        <HomeItem
+          title="Total Tasks"
+          count={isLoading ? "Loading" : (boardTasks?.length as number) ?? 0}
+        />
       </div>
-      <div className="grid  mt-10 w-full  md:grid-cols-2 sm:grid-cols-1 ">
-        <DoughnutChart content={boardTasks} />
-        <PriorityChart content={boardTasks} />
-      </div>
+      {boardTasks.length > 0 && (
+        <div className="grid  mt-10 w-full  md:grid-cols-2 sm:grid-cols-1 ">
+          <DoughnutChart content={boardTasks} />
+          <PriorityChart content={boardTasks} />
+        </div>
+      )}
     </div>
   );
 }

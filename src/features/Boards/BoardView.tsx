@@ -18,7 +18,7 @@ import { getAuthToken } from "../../utils/storageUtils";
 
 const BoardList: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
-  const [limit] = useState(5);
+  const [limit] = useState(6);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);

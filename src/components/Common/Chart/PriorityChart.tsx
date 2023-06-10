@@ -84,8 +84,8 @@ export default function PriorityChart(props: { content: Task[] }) {
           lowPriorityTasks.length,
         ],
         backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
+          "rgb(131 98 191)",
+          "rgb(130 53 165)",
           "rgba(255, 99, 132, 0.5)",
         ],
       },

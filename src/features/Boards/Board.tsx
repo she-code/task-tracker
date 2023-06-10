@@ -27,6 +27,7 @@ import NotFound from "../../components/Common/NotFound/NotFound";
 import ModalOpenerBtn from "../../components/Common/Button/ModalOpenerBtn";
 import { getAuthToken } from "../../utils/storageUtils";
 import { navigate } from "raviger";
+import CheckIcon from "../../components/Common/Icons/CheckIcon";
 
 export default function Board(props: { id: number }) {
   const { id } = props;
@@ -172,25 +173,31 @@ export default function Board(props: { id: number }) {
   return board ? (
     <div className="w-10/12   mx-auto  overflow-x-auto">
       <h1 className="text-3xl font-semibold my-5 text-white">{board?.title}</h1>
-      <div className="flex justify-between w-[90%]">
-        <button className="flex focus:outline-none border-2 border-gray-400 px-4 py-2 rounded  w-44  items-center justify-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-            />
-          </svg>
-          <span className="text-lg ml-2">Filter </span>
-        </button>
-
+      <div className="flex justify-between w-[90%] items-center">
+        <div className="flex">
+          <p className="text-white mr-2">
+            {" "}
+            <span className="bg-red-500 px-2 py-2 rounded focus:outline-none inline-block mr-1 w-9"></span>
+            High
+          </p>
+          <p className="text-white mr-2">
+            {" "}
+            <span className="bg-yellow-500 px-2 py-2 rounded focus:outline-none inline-block mr-1 w-9"></span>
+            Medium
+          </p>
+          <p className="text-white mr-2">
+            {" "}
+            <span className="bg-green-500 px-2 py-2 rounded focus:outline-none inline-block mr-1 w-9"></span>
+            Low
+          </p>
+          <p className="flex text-white ">
+            {" "}
+            <span className="mr-2 inline bg-white text-brown px-2 py-1">
+              {<CheckIcon />}
+            </span>
+            Completed{" "}
+          </p>
+        </div>
         <ModalOpenerBtn
           icon={
             <svg

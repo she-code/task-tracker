@@ -36,7 +36,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="items-center lg:w-1/3 mx-auto mt-20 md:w-1/2 sm:w-full">
+    <div className="items-center lg:w-[700px] mx-auto mt-20   md:w-2/3 sm:w-full">
       <h1 className="text-center text-3xl font-semibold text-white">SIGN UP</h1>
       <form action="" onSubmit={handleSubmit}>
         <div className="p-3">
@@ -114,7 +114,7 @@ export default function SignUp() {
       </form>
       {error && <p className="text-red-500">{error}</p>}
       <p className="text-white text-lg ml-4">
-        Already have account?
+        Already have an account?
         <span>
           <Link
             href="/login"
