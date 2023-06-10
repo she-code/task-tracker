@@ -1,4 +1,4 @@
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useState, useEffect } from "react";
 import { login } from "../../utils/apiUtils";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
@@ -69,10 +69,22 @@ export default function Login() {
             value={password}
           />
         </div>
+
         <div className="p-3">
           <SubmitBtn title="Sign In" />
         </div>
       </form>
+      <p className="text-white text-lg ml-4">
+        New User?
+        <span>
+          <Link
+            href="/signup"
+            className="text-white text-lg font-semibold mr-2 ml-2"
+          >
+            Create Account
+          </Link>
+        </span>
+      </p>
     </div>
   );
 }

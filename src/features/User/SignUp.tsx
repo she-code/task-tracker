@@ -6,7 +6,7 @@ import { setEmail, setPassword, setPassword2, setUserName } from "./userSlice";
 import { User, validateSignUpData } from "../../types/userTypes";
 import { Errors } from "../../types/common";
 import { signUpUser } from "./userActions";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 
 export default function SignUp() {
   const { username, password2, password1, email, error } = useAppSelector(
@@ -113,6 +113,17 @@ export default function SignUp() {
         </div>
       </form>
       {error && <p className="text-red-500">{error}</p>}
+      <p className="text-white text-lg ml-4">
+        Already have account?
+        <span>
+          <Link
+            href="/login"
+            className="text-white text-lg font-semibold mr-2 ml-2"
+          >
+            Sign In{" "}
+          </Link>
+        </span>
+      </p>
     </div>
   );
 }
