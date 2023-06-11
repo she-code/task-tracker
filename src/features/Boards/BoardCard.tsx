@@ -4,6 +4,7 @@ import Modal from "../../components/Common/Modal/Modal";
 import EditBoard from "./EditBoard";
 import { useAppDispacth } from "../../app/hooks";
 import { deleteBoardAction } from "./boardActions";
+import { deleteSuccess } from "../../components/Common/Notifications";
 
 export default function BoardCard(props: {
   title: string;
@@ -16,9 +17,11 @@ export default function BoardCard(props: {
   const [showEditModal, setShowEditModal] = useState(false);
   const dispatch = useAppDispacth();
 
-  //handles formField deletion
+  //handles board deletion
   const handleDeleteBoard = (boardId: number) => {
-    dispatch(deleteBoardAction(boardId));
+    dispatch(deleteBoardAction(boardId)).then((res) => {
+      deleteSuccess();
+    });
   };
 
   return (

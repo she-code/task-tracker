@@ -12,7 +12,7 @@ import PriorityChart from "../../components/Common/Chart/PriorityChart";
 import Loading from "../../components/Common/Loading/Loading";
 import { getAuthToken } from "../../utils/storageUtils";
 import { navigate } from "raviger";
-import { is } from "date-fns/locale";
+import { clearBoards } from "../Boards/boardSlice";
 
 export default function Home() {
   const user = useAppSelector((state: RootState) => state.users.user);
@@ -36,6 +36,9 @@ export default function Home() {
     dispatch(fetchBoards());
     dispatch(fetchStatuses());
 
+    return () => {
+      dispatch(clearBoards());
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -71,7 +74,6 @@ export default function Home() {
           );
           setBoardTasks(response);
           setIsLoading(false);
-          console.log({ boardTasks: response });
         } catch (error) {
           console.error("Error fetching tasks for boards:", error);
 
@@ -85,7 +87,9 @@ export default function Home() {
   }, [boards, tasks]);
 
   return loading ? (
-    <Loading />
+    <div className="h-full flex items-center">
+      <Loading />
+    </div>
   ) : (
     <div className=" w-10/12   mx-auto">
       <p className="text-xl  text-white mt-3">

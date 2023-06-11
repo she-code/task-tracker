@@ -1,10 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserProfile from "../../../features/User/UserProfile";
 import SidebarData from "./SideBarData";
 import { User } from "../../../types/userTypes";
 
 export default function Sidebar(props: { user: User | null }) {
   const [toggle, setToggle] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 1000);
+    };
+
+    handleResize(); // Check initial screen size
+    window.addEventListener("resize", handleResize);
+    isSmallScreen ? setToggle(true) : setToggle(false);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isSmallScreen]);
   return (
     <div
       className={`${

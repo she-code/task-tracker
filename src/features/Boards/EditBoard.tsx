@@ -6,6 +6,7 @@ import { editBoard } from "../../utils/apiUtils";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
 import {
+  clearBoard,
   requestFailure,
   setBoardDescription,
   setBoardTitle,
@@ -13,6 +14,7 @@ import {
 } from "./boardSlice";
 import { fetchBoard } from "./boardActions";
 import { Errors } from "../../types/common";
+import { updateSuccess } from "../../components/Common/Notifications";
 
 export default function EditBoard(props: {
   id: number;
@@ -22,23 +24,34 @@ export default function EditBoard(props: {
   const [errors, setErrors] = useState<Errors<Board>>({});
   const dispatch = useAppDispacth();
   const board = useAppSelector((state: RootState) => state.boards.board);
-  const loading = useAppSelector((state: RootState) => state.boards.loading);
+  const [loading, setLoading] = useState(false);
   const error = useAppSelector((state: RootState) => state.boards.error);
 
+  //initial fetch of board data
   useEffect(() => {
     dispatch(fetchBoard(props.id));
   }, [dispatch, props.id]);
 
+  useEffect(() => {
+    dispatch(clearBoard());
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  //handles form submit
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const validationErrors = validateBoard(board);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
       try {
+        setLoading(true);
         const data = await editBoard(board, props.id);
         dispatch(updateBoardSuccess(data));
         if (data) {
+          setLoading(false);
           handleCloseModal();
+          updateSuccess();
           // window.location.href = "/boards";
         }
       } catch (error) {
@@ -88,9 +101,8 @@ export default function EditBoard(props: {
         <button
           type="submit"
           className="bg-green-600 rounded py-2 px-3 text-white "
-          disabled={loading}
         >
-          Submit
+          {loading ? "Please wait.." : "Submit"}
         </button>
       </form>
       {error ? <p>{error}</p> : ""}

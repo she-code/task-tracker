@@ -25,6 +25,7 @@ export type TaskStateType = {
   title: string;
   description: string;
   status: number;
+  board: number;
   due_date?: string | null;
   priority?: string;
   is_completed?: boolean;

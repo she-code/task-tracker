@@ -1,11 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
 import { Errors } from "../../types/common";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
-import { setDescription, setDueDate, setPriority, setTitle } from "./taskSlice";
+import {
+  setBoard,
+  setDescription,
+  setDueDate,
+  setPriority,
+  setStatus,
+  setTitle,
+} from "./taskSlice";
 import { Task, validateTask } from "../../types/taskTypes";
 import { createTask } from "./taskActions";
+import { fetchStatuses } from "../Status/statusAction";
+import { createSuccess } from "../../components/Common/Notifications";
 
 export default function CreateTaskWithOptions(props: {
   // boardId: number;
@@ -14,57 +23,82 @@ export default function CreateTaskWithOptions(props: {
 }) {
   const { handleClose } = props;
   const [errors, setErrors] = useState<Errors<Task>>({});
+  const [loading, setLoading] = useState(false);
 
   const boards = useAppSelector((state: RootState) => state.boards.boards);
-  const [statusId, setStatusId] = useState(0);
-
-  const [boardId, setBoardId] = useState(0);
 
   const statuses = useAppSelector(
     (state: RootState) => state.statuses.statuses
   );
-  console.log({ statuses });
   const dispatch = useAppDispacth();
-  const { title, description, due_date, priority, is_completed } =
-    useAppSelector((state: RootState) => state.tasks);
+  const {
+    title,
+    description,
+    due_date,
+    priority,
+    status,
+    board,
+    is_completed,
+  } = useAppSelector((state: RootState) => state.tasks);
 
-  // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-  //   event.preventDefault();
-  //   const validationErrors = validateTask({
-  //     title,
-  //     description,
-  //     status: statusId,
-  //     board: boardId,
-  //   });
+  //fetch statuses
+  useEffect(() => {
+    dispatch(fetchStatuses());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  //   setErrors(validationErrors);
-  //   if (Object.keys(validationErrors).length === 0) {
-  //     // console.log(statusId, title);
-  //     try {
-  //       dispatch(
-  //         createTask({
-  //           task: {
-  //             title,
-  //             description,
-  //             status: statusId,
-  //             board: boardId,
-  //             due_date,
-  //             priority,
-  //             is_completed,
-  //           },
-  //           id: boardId,
-  //         })
-  //       );
-  //       handleClose();
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // };
+  //set intial status and board
+  useEffect(() => {
+    if (statuses.length > 0) {
+      dispatch(setStatus(statuses[0]?.id as number));
+    }
+    if (boards.length > 0) {
+      dispatch(setBoard(boards[0]?.id as number));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  //handles submit
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const validationErrors = validateTask({
+      title,
+      description,
+      status: status,
+      board: board,
+    });
+
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length === 0) {
+      try {
+        setLoading(true);
+        dispatch(
+          createTask({
+            task: {
+              title,
+              description,
+              status: status,
+              board: board,
+              due_date,
+              priority,
+              is_completed,
+            },
+            id: board,
+          })
+        ).then((_) => {
+          setLoading(false);
+          createSuccess();
+          handleClose();
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
   return (
     <div className="p-3">
       <h1 className="text-2xl font-semibold my-5 text-center">Create Task</h1>
-      <form>
+      <form onSubmit={handleSubmit}>
         <div className="p-2  ">
           <div className="flex items-center">
             <label htmlFor="title" className="text-lg font-semibold mr-2">
@@ -88,7 +122,6 @@ export default function CreateTaskWithOptions(props: {
             </label>
             <CustomInputField
               handleInputChangeCB={(event) => {
-                console.log(event.target.value);
                 dispatch(setDescription(event.target.value));
               }}
               type="text"
@@ -100,18 +133,16 @@ export default function CreateTaskWithOptions(props: {
             <p className="text-red-500">{errors.description}</p>
           )}
         </div>
-        <div className="p-2 flex ">
+        <div className="p-2 flex mr-2">
           <div className="flex items-center">
-            <label
-              htmlFor="priority"
-              className="text-lg font-semibold mr-2 mt-5"
-            >
+            <label htmlFor="priority" className="text-lg font-semibold  ">
               Priority
             </label>
-            <div className=" mt-5">
+            <div className="mr-2">
               <select
                 className="p-5 focus:outline-none   focus:border-l-green-500 focus:border-l-4 py-2 text-md "
                 onChange={(e) => dispatch(setPriority(e.target.value))}
+                value={priority}
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -119,7 +150,7 @@ export default function CreateTaskWithOptions(props: {
               </select>
             </div>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center mr-2">
             <label
               className="mr-2 text-xl font-semibold text-black"
               htmlFor="selectBoard"
@@ -130,8 +161,8 @@ export default function CreateTaskWithOptions(props: {
               aria-label="Select Board"
               title="selectBoard"
               className="px-4 py-4 focus:outline-none font-light  focus:border-l-green-500 focus:border-l-4 rounded-md"
-              onChange={(e) => setBoardId(Number(e.target.value))}
-              value={boardId}
+              onChange={(e) => dispatch(setBoard(Number(e.target.value)))}
+              value={board}
             >
               {boards?.map((board) => (
                 <option value={board.id} key={board.id}>
@@ -151,12 +182,12 @@ export default function CreateTaskWithOptions(props: {
               aria-label="Select Statustatus"
               title="selectStatus"
               className="px-4 py-4 focus:outline-none font-light  focus:border-l-green-500 focus:border-l-4 rounded-md"
-              onChange={(e) => setStatusId(Number(e.target.value))}
-              value={statusId}
+              onChange={(e) => dispatch(setStatus(Number(e.target.value)))}
+              value={status}
             >
               {statuses?.map((status) => (
                 <option value={status.id} key={status.id}>
-                  {status.title}
+                  {status.title.split(":")[0]}
                 </option>
               ))}
             </select>
@@ -183,12 +214,10 @@ export default function CreateTaskWithOptions(props: {
         <button
           type="submit"
           className="bg-green-600 rounded py-2 px-3 text-white "
-          //disabled={statusLoading}
         >
-          Submit
+          {loading ? "Please wait..." : "Submit"}
         </button>
       </form>
-      {/* {statusError ? <p>{statusError}</p> : ""} */}
     </div>
   );
 }

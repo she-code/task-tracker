@@ -19,6 +19,7 @@ import StatusItem from "../Status/StatusItem";
 import {
   addStatusesToBoard,
   addTasksToBoard,
+  clearBoard,
   clearBoardWithStatuses,
   updateTaksOnDnD,
 } from "./boardSlice";
@@ -28,17 +29,17 @@ import ModalOpenerBtn from "../../components/Common/Button/ModalOpenerBtn";
 import { getAuthToken } from "../../utils/storageUtils";
 import { navigate } from "raviger";
 import CheckIcon from "../../components/Common/Icons/CheckIcon";
+import { deleteSuccess } from "../../components/Common/Notifications";
 
 export default function Board(props: { id: number }) {
   const { id } = props;
   const [showStatusModel, setShowStatusModel] = useState(false);
 
   const dispatch = useAppDispacth();
-  // const [statusDescription, setStatusDescription] = useState(status?.description);
-
+  const [statusD, setStatusData] = useState<Status | null>(null);
+  const [newDescription, setNewDescription] = useState("");
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
   const loading = useAppSelector((state: RootState) => state.tasks.loading);
-  // const error = useAppSelector((state: RootState) => state.tasks.error);
   const board = useAppSelector((state: RootState) => state.boards.board);
 
   const boardStatuses = useAppSelector(
@@ -48,23 +49,28 @@ export default function Board(props: { id: number }) {
   const statuses = useAppSelector(
     (state: RootState) => state.statuses.statuses
   );
+
+  //redirects to login page if user is not authenticated
   useEffect(() => {
     if (getAuthToken() === null) {
       navigate("/login");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  //fetches initial data
   useEffect(() => {
     dispatch(fetchBoard(id));
     if (board) {
       dispatch(fetchTasks(id));
       dispatch(fetchStatuses());
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, id]);
 
+  // Updates the board statuses with the tasks
   useEffect(() => {
-    // Update the board statuses with the tasks
     board &&
       statuses?.forEach((status) => {
         const statusBoardId = status?.title?.split(":")[1];
@@ -101,22 +107,48 @@ export default function Board(props: { id: number }) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, id, statuses, tasks]);
+
+  // Updates the board statuses with the tasks
   useEffect(() => {
-    // Cleanup function when leaving the page
     return () => {
       dispatch(clearBoardWithStatuses());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  //clears the board when the component unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(clearBoard());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const handleDescriptionChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     status: Status
   ) => {
-    const newDesc = e.target.value;
+    const newDesc = e?.target?.value;
     // setStatusDescription(newDesc);
-    debouncedUpdateStatusDesc(status, newDesc);
+    setNewDescription(newDesc);
+    setStatusData(status);
+    // debouncedUpdateStatusDesc(status, newDesc);
   };
+  // const [inputValue, setInputValue] = React.useState("");
+  // const handleInputChange = (
+  //   event: React.ChangeEvent<HTMLInputElement>,
+  //   status: Status
+  // ) => {
+  //   setInputValue(event.target.value);
+  //   setStatusData(status);
+  // };
+  // const [debouncedInputValue, setDebouncedInputValue] = React.useState("");
+  // useEffect(() => {
+  //   const delayInputTimeoutId = setTimeout(() => {
+  //     setDebouncedInputValue(inputValue);
+  //   }, 500);
+  //   return () => clearTimeout(delayInputTimeoutId);
+  // }, [inputValue, 500]);
+
   const dispatchUpdateStatusDesc = (statusData: Status, newDesc: string) => {
     dispatch(
       updateStatusDescAction({
@@ -125,17 +157,41 @@ export default function Board(props: { id: number }) {
       })
     );
   };
-  const debouncedUpdateStatusDesc = debounce(dispatchUpdateStatusDesc, 500); // Adjust the debounce delay as needed
+  const debouncedUpdateStatusDesc = debounce(handleDescriptionChange, 200);
+  useEffect(() => {
+    dispatch(
+      updateStatusDescAction({
+        statusData: statusD as Status,
+        newDesc: newDescription,
+      })
+    );
+  }, [newDescription]);
 
   useEffect(() => {
     return () => {
       debouncedUpdateStatusDesc.cancel();
     };
   }, [debouncedUpdateStatusDesc]);
+
+  //deltes a status
   const handleDeleteStatus = (statusId: number) => {
-    dispatch(deleteStatusAction({ statusId }));
+    dispatch(deleteStatusAction({ statusId })).then(() => {
+      deleteSuccess();
+    });
   };
 
+  // useEffect(() => {
+  //   if (debouncedInputValue) {
+  //     dispatch(
+  //       updateStatusDescAction({
+  //         statusData: statusD as Status,
+  //         newDesc: debouncedInputValue,
+  //       })
+  //     );
+  //   }
+  // }, [debouncedInputValue, dispatch, statusD]);
+
+  //handles drag and drop
   const handleDragEnd = async (result: DropResult) => {
     const { destination, source } = result;
     if (!destination) return;
@@ -224,7 +280,7 @@ export default function Board(props: { id: number }) {
       ) : (
         <>
           {boardStatuses?.length === 0 ? (
-            <div className="m-5 text-center text-xl font-semibold">
+            <div className="m-5 text-center text-2xl font-semibold text-white">
               No Status Created
             </div>
           ) : (

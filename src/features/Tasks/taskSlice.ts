@@ -16,6 +16,7 @@ const initialState: TaskStateType = {
   title: "",
   description: "",
   status: 0,
+  board: 0,
   priority: "low",
   is_completed: false,
   boardTasks: [],
@@ -70,7 +71,7 @@ const taskSlice = createSlice({
       const { priority, due_date, is_completed } =
         action.payload.taskDescription;
 
-      // Find the task based on its ID or any other identifier
+      // Find the task based on its ID
       const taskToUpdate = state.tasks.find(
         (task) => task.id === action.payload.taskId
       );
@@ -82,7 +83,12 @@ const taskSlice = createSlice({
         taskToUpdate.is_completed = is_completed;
       }
     },
-
+    setStatus(state, action: PayloadAction<number>) {
+      state.status = action.payload;
+    },
+    setBoard(state, action: PayloadAction<number>) {
+      state.board = action.payload;
+    },
     setPriority(state, action: PayloadAction<string>) {
       state.priority = action.payload;
     },
@@ -152,6 +158,14 @@ const taskSlice = createSlice({
       //   return acc;
       // })
     },
+    clearTask(state) {
+      state.task = {
+        title: "",
+        description: "",
+        status: 0,
+        board: 0,
+      };
+    },
   },
 });
 
@@ -175,7 +189,10 @@ export const {
   setPriority,
   setTaskFields,
   setTaskPriority,
+  setStatus,
+  setBoard,
   setTaskCompleted,
   deleteTaskSuccess,
   groupTaskByBoardId,
+  clearTask,
 } = taskSlice.actions;

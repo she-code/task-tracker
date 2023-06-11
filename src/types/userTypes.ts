@@ -21,7 +21,10 @@ export type UserStateType = {
   email: string;
   password2: string;
 };
-
+function isEmailValid(email: string) {
+  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+  return typeof email === "string" && emailRegex.test(email);
+}
 export const validateSignUpData = (user: User) => {
   const { username, email, password1, password2 } = user;
   const errors: Errors<User> = {};
@@ -34,12 +37,17 @@ export const validateSignUpData = (user: User) => {
   if (email?.length < 1) {
     errors.email = "Emial is required";
   }
-  if (password1.length < 1) {
+  if (!isEmailValid(email)) {
+    errors.email = "Email is invalid";
+  }
+  if (password1.length < 8) {
     errors.password1 = "Password is required";
   }
   if (isEmpty(password2)) {
     errors.password2 = "Confirm Password is required";
   }
-
+  if (password1 !== password2) {
+    errors.password2 = "Passwords must match";
+  }
   return errors;
 };

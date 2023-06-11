@@ -6,6 +6,7 @@ import { RootState } from "../../app/store";
 import { setDescription, setDueDate, setPriority, setTitle } from "./taskSlice";
 import { Task, validateTask } from "../../types/taskTypes";
 import { createTask } from "./taskActions";
+import { createSuccess } from "../../components/Common/Notifications";
 
 export default function CreateTask(props: {
   boardId: number;
@@ -14,10 +15,12 @@ export default function CreateTask(props: {
 }) {
   const { boardId, statusId, handleClose } = props;
   const [errors, setErrors] = useState<Errors<Task>>({});
+  const [loading, setLoading] = useState(false);
   const dispatch = useAppDispacth();
   const { title, description, due_date, priority, is_completed } =
     useAppSelector((state: RootState) => state.tasks);
 
+  //handles submit
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const validationErrors = validateTask({
@@ -29,8 +32,8 @@ export default function CreateTask(props: {
 
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
-      console.log(statusId, title);
       try {
+        setLoading(true);
         dispatch(
           createTask({
             task: {
@@ -44,7 +47,10 @@ export default function CreateTask(props: {
             },
             id: boardId,
           })
-        );
+        ).then((_) => {
+          setLoading(false);
+          createSuccess();
+        });
         handleClose();
       } catch (error) {
         console.log(error);
@@ -78,7 +84,6 @@ export default function CreateTask(props: {
             </label>
             <CustomInputField
               handleInputChangeCB={(event) => {
-                console.log(event.target.value);
                 dispatch(setDescription(event.target.value));
               }}
               type="text"
@@ -131,12 +136,10 @@ export default function CreateTask(props: {
         <button
           type="submit"
           className="bg-green-600 rounded py-2 px-3 text-white "
-          //disabled={statusLoading}
         >
-          Submit
+          {loading ? "Please wait..." : "Submit"}
         </button>
       </form>
-      {/* {statusError ? <p>{statusError}</p> : ""} */}
     </div>
   );
 }

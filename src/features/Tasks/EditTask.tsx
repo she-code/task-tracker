@@ -11,8 +11,12 @@ import {
   stringifyTaskDescription,
   validateTask,
 } from "../../types/taskTypes";
-import { setTaskDescription, setTaskTitle } from "./taskSlice";
+import { clearTask, setTaskDescription, setTaskTitle } from "./taskSlice";
 import { deleteTaskAction, editTaskAction, fetchTask } from "./taskActions";
+import {
+  deleteSuccess,
+  updateSuccess,
+} from "../../components/Common/Notifications";
 
 export default function EditTask(props: {
   boardId: number;
@@ -22,6 +26,8 @@ export default function EditTask(props: {
 }) {
   const { handleCloseModal, boardId, taskId } = props;
   const [errors, setErrors] = useState<Errors<Task>>({});
+  const [loading, setLoading] = useState(false);
+
   const dispatch = useAppDispacth();
   const task = useAppSelector((state: RootState) => state.tasks.task);
   const [description, setDescription] = useState<string>("");
@@ -29,6 +35,7 @@ export default function EditTask(props: {
   const [priority, setPriority] = useState<string>("");
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
+  //initial fetch of task data
   useEffect(() => {
     const fetchTaskData = async () => {
       await dispatch(fetchTask({ boardId, taskId }));
@@ -37,9 +44,9 @@ export default function EditTask(props: {
     fetchTaskData();
   }, [dispatch, boardId, taskId]);
 
+  //sets task fields
   useEffect(() => {
     if (task && task?.description) {
-      console.log(parseTaskDescription(task?.description)?.description);
       setDescription(parseTaskDescription(task?.description)?.description);
       setPriority(parseTaskDescription(task?.description)?.priority);
       setDueDate(parseTaskDescription(task?.description)?.due_date);
@@ -47,6 +54,7 @@ export default function EditTask(props: {
     }
   }, [task]);
 
+  //updates task description
   useEffect(() => {
     const updatedDescription = stringifyTaskDescription({
       description: description,
@@ -55,16 +63,28 @@ export default function EditTask(props: {
       is_completed: isCompleted,
     });
     dispatch(setTaskDescription(updatedDescription));
-    console.log({ updatedDescription });
   }, [description, priority, dueDate, isCompleted, dispatch]);
 
+  //clears task on unmount
+  useEffect(() => {
+    return () => {
+      dispatch(clearTask());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  //handles form submit
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const validationErrors = validateTask(task);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
       try {
-        dispatch(editTaskAction({ task, boardId }));
+        setLoading(true);
+        dispatch(editTaskAction({ task, boardId })).then((_) => {
+          setLoading(false);
+          updateSuccess();
+        });
         handleCloseModal();
       } catch (error) {
         console.log(error);
@@ -73,10 +93,14 @@ export default function EditTask(props: {
     }
   };
 
+  //handles delete task
   const handleDeleteTask = () => {
-    dispatch(deleteTaskAction({ taskId, boardId }));
+    dispatch(deleteTaskAction({ taskId, boardId })).then((_) => {
+      deleteSuccess();
+    });
     handleCloseModal();
   };
+
   return (
     <div className="p-3">
       <h1 className="text-2xl font-semibold my-5 text-center">Edit Task</h1>
@@ -144,7 +168,6 @@ export default function EditTask(props: {
             <CustomInputField
               handleInputChangeCB={(event) => {
                 setDueDate(event.target.value);
-                console.log({ event: event.target.value, due: dueDate });
               }}
               type="datetime-local"
               name="dueDate"
@@ -177,9 +200,8 @@ export default function EditTask(props: {
           <button
             type="submit"
             className="bg-green-600 rounded py-2 px-3 text-white "
-            // disabled={loading}
           >
-            Submit
+            {loading ? "Loading..." : "Save"}
           </button>
           <button
             className="bg-gray-600 rounded py-2 px-3 text-white "
@@ -187,13 +209,11 @@ export default function EditTask(props: {
               e.preventDefault();
               handleDeleteTask();
             }}
-            // disabled={loading}
           >
             Delete
           </button>
         </div>
       </form>
-      {/* {error ? <p>{error}</p> : ""} */}
     </div>
   );
 }

@@ -6,26 +6,35 @@ import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
 import { createStatus } from "./statusAction";
 import { setDescription, setTitle } from "./statusSlice";
+import { createSuccess } from "../../components/Common/Notifications";
 
 export default function CreateStatus(props: {
   boardId: number;
   handleCloseModal: () => void;
 }) {
   const { boardId, handleCloseModal } = props;
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors<Status>>({});
   const dispatch = useAppDispacth();
-  const { title, description, statusError, statusLoading } = useAppSelector(
+  const { title, description, statusError } = useAppSelector(
     (state: RootState) => state.statuses
   );
 
+  //handles submit
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const validationErrors = validateStatus({ title, description });
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
       try {
-        dispatch(createStatus({ statusData: { title, description }, boardId }));
-        handleCloseModal();
+        setLoading(true);
+        dispatch(
+          createStatus({ statusData: { title, description }, boardId })
+        ).then((_) => {
+          setLoading(false);
+          createSuccess();
+          handleCloseModal();
+        });
       } catch (error) {}
     }
   };
@@ -71,9 +80,8 @@ export default function CreateStatus(props: {
         <button
           type="submit"
           className="bg-green-600 rounded py-2 px-3 text-white "
-          disabled={statusLoading}
         >
-          Submit
+          {loading ? "Please wait.." : "Submit"}
         </button>
       </form>
       {statusError ? <p>{statusError}</p> : ""}

@@ -7,7 +7,6 @@ import Board from "../features/Boards/Board";
 import Todos from "../features/Tasks/Tasks";
 import SignUp from "../features/User/SignUp";
 import NotFound from "../components/Common/NotFound/NotFound";
-import { ToastContainer } from "react-toastify";
 
 export default function AppRouter(props: {
   collapsed: boolean;
@@ -32,18 +31,6 @@ export default function AppRouter(props: {
   return (
     <AppContainer collapsed={collapsed} toggleSidebar={toggleCollapsedCB}>
       {routeResult}
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar={true}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
     </AppContainer>
   );
 }

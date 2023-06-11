@@ -8,6 +8,7 @@ import EditIcon from "../../components/Common/Icons/EditIcon";
 import CheckIcon from "../../components/Common/Icons/CheckIcon";
 import { deleteTaskAction } from "./taskActions";
 import { useAppDispacth } from "../../app/hooks";
+import { deleteSuccess } from "../../components/Common/Notifications";
 
 export default function TaskCard1(props: {
   task: Task;
@@ -23,6 +24,7 @@ export default function TaskCard1(props: {
   const [is_completed, setIsCompleted] = useState<boolean>(false);
   const dispatch = useAppDispacth();
 
+  //sets task fields
   useEffect(() => {
     if (task && task?.description) {
       setPriority(parseTaskDescription(task?.description)?.priority);
@@ -30,8 +32,13 @@ export default function TaskCard1(props: {
     }
   }, [task]);
 
+  //handles task deletion
   const handleDeleteTask = () => {
-    dispatch(deleteTaskAction({ taskId: task?.id as number, boardId }));
+    dispatch(deleteTaskAction({ taskId: task?.id as number, boardId })).then(
+      (res) => {
+        deleteSuccess();
+      }
+    );
   };
   return (
     <div

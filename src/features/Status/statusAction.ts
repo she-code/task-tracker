@@ -72,7 +72,6 @@ export const updateStatusTitleAction = createAsyncThunk(
       );
       if (updatedStatus) {
         dispatch(updateStatus(updatedStatus));
-        console.log("updatedStatus", updatedStatus);
       }
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));
@@ -97,7 +96,6 @@ export const updateStatusDescAction = createAsyncThunk(
       );
       if (updatedStatus) {
         dispatch(updateStatus(updatedStatus));
-        console.log("updatedStatus", updatedStatus);
       }
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));

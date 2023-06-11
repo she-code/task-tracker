@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useMatch } from "raviger";
-// import SideBar from "./Common/SideBar/SideBar";
 import { fetchUser } from "../features/User/userActions";
 import { useAppDispacth, useAppSelector } from "../app/hooks";
 import { RootState } from "../app/store";
@@ -32,25 +31,10 @@ export default function AppContainer(props: {
       {matchBoards || matchBoard || matchTasks || matchHome ? (
         <Sidebar user={user} />
       ) : (
-        // <div className="">
-        // {/*
-        // max-h-max min-h-screen overflow-y-auto  overflow-x-hidden mx-auto
-        // flex relative flex-col
-        // <Header
-        //   toggleSidebar={toggleSidebar}
-        //   collapsed={collapsed}
-        //   currentUser={user}
-        // /> */}
-        // {/* <Navbar /> */}
-        // {/* <SideBar /> */}
-
-        // {/* <SideBar collapsed={collapsed} /> */}
-        // </div>
         <></>
       )}
 
       <div className={` w-full mx-auto p-6 `}>{props.children}</div>
-      {/* </div> */}
     </div>
   );
 }

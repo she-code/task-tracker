@@ -47,8 +47,6 @@ export const createTask = createAsyncThunk(
         }),
       };
       newTask = await createTaskApi(updatedTask, id);
-      console.log({ newTask });
-      // }
       if (newTask) {
         dispatch(createTaskSuccess(newTask));
       }
@@ -98,8 +96,8 @@ export const updateTaskStatusAction = createAsyncThunk(
         ...newTask,
         status: newTask?.status_object?.id,
       };
-
-      return updatedTaskWithStatus; // Return the updated task from the action
+      // Return the updated task from the action
+      return updatedTaskWithStatus;
     } catch (error) {
       throw error;
     }
@@ -109,15 +107,12 @@ export const editTaskAction = createAsyncThunk(
   "tasks/editTask",
   async ({ task, boardId }: { task: Task; boardId: number }, { dispatch }) => {
     try {
-      // const { due_date, description, priority, is_completed } = task;
       let newTask: Task;
-      console.log({ task });
       const updatedTask: Task = {
         ...task,
         status: task?.status_object?.id as number,
       };
       newTask = await updateTaskApi(updatedTask, boardId, task.id as number);
-      console.log({ newTask }, "yes", { st: task.status });
 
       if (newTask) {
         dispatch(updateTaskSuccess(newTask));

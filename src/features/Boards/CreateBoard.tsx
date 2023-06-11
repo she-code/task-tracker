@@ -87,7 +87,6 @@ export default function CreateBoard(props: { handleClose: () => void }) {
         <button
           type="submit"
           className="bg-green-600 rounded py-2 px-3 text-white "
-          disabled={loading}
         >
           {loading ? "Please wait..." : "Submit"}
         </button>

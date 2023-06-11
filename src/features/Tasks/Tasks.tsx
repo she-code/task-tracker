@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { isFuture, isPast, isToday } from "date-fns";
+
 import { RootState } from "../../app/store";
 import { useAppSelector, useAppDispacth } from "../../app/hooks";
 import { fetchBoards } from "../Boards/boardActions";
@@ -8,64 +9,59 @@ import TaskCard from "./TaskCard";
 import { parseTaskDescription } from "../../types/taskTypes";
 import { setTaskFields } from "./taskSlice";
 import Modal from "../../components/Common/Modal/Modal";
-import EditTask from "./EditTask";
 import ModalOpenerBtn from "../../components/Common/Button/ModalOpenerBtn";
 import Loading from "../../components/Common/Loading/Loading";
 import CreateTaskWithOptions from "./CreateTaskWithOption";
 import { getAuthToken } from "../../utils/storageUtils";
 import { navigate } from "raviger";
-import DeleteIcon from "../../components/Common/Icons/DeleteIcon";
-import EditIcon from "../../components/Common/Icons/EditIcon";
+import { clearBoards } from "../Boards/boardSlice";
+import TaskRow from "./TaskRow";
+import { deleteSuccess } from "../../components/Common/Notifications";
 
 export default function Todos() {
-  const [showModal, setShowModal] = useState(false);
   const [gridView, setGridView] = useState(true);
   const dispatch = useAppDispacth();
   const boards = useAppSelector((state: RootState) => state.boards.boards);
   const loading = useAppSelector((state: RootState) => state.boards.loading);
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
-  const [filterTasks, setFilterTasks] = useState("today");
+  const [filterTasks, setFilterTasks] = useState("all");
   const [filterOptions, setFilterOptions] = useState("all");
   const [description, setDescription] = useState("");
   const [boardId, setBoardId] = useState(boards[0]?.id || 0);
   const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
 
+  //checks the requird credentials
   useEffect(() => {
     if (getAuthToken() === null) {
       navigate("/login");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  //fetches the boards
   useEffect(() => {
     dispatch(fetchBoards()).then(() => {
       setBoardId(boards[0]?.id || 0);
-      console.log({ boardId });
     });
-    console.log({ boardId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boards.length]);
 
+  //fetches the tasks for the selected board
   useEffect(() => {
     if (boardId === 0) {
       return;
     }
     dispatch(fetchTasks(boardId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boardId, filterTasks, filterOptions]);
+  }, [boardId, filterTasks, filterOptions, tasks.length]);
 
+  //sets the task fields
   useEffect(() => {
     tasks?.forEach((task) => {
       if (task && task?.description) {
         const parsedTaskDescription = parseTaskDescription(task?.description);
 
         setDescription(parsedTaskDescription?.description);
-
-        console.log(
-          parsedTaskDescription.priority,
-          parsedTaskDescription.due_date,
-          parsedTaskDescription.is_completed
-        );
-
         dispatch(
           setTaskFields({
             taskId: task.id as number,
@@ -78,12 +74,21 @@ export default function Todos() {
         );
       }
     });
-
-    console.log({ tasks });
   }, [dispatch, tasks]);
 
+  //clears the boards
+  useEffect(() => {
+    return () => {
+      dispatch(clearBoards());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  //filters the tasks based on the selected option
   const handleTaskDelete = (taskId: number, boardId: number) => {
-    dispatch(deleteTaskAction({ taskId, boardId }));
+    dispatch(deleteTaskAction({ taskId, boardId })).then(() => {
+      deleteSuccess();
+    });
   };
 
   return (
@@ -97,6 +102,7 @@ export default function Todos() {
             className=" focus:outline-none px-4 py-4 mr-5 focus:border-l-green-500 focus:border-l-4  text-lg font-semibold rounded-md"
             onChange={(e) => setFilterTasks(e.target.value)}
           >
+            <option value="all">All</option>
             <option value="today">Today</option>
             <option value="overdue">Overdue</option>
             <option value="upcoming">Upcoming</option>
@@ -384,81 +390,12 @@ export default function Todos() {
                               return true;
                             })
                             .map((task, index) => (
-                              <tr
-                                className="border-b  even:hover:bg-neutral-100 odd:hover:bg-slate-400 cursor-pointer"
-                                key={task?.id}
-                              >
-                                <td className="whitespace-nowrap px-6 py-4 font-medium">
-                                  <p>{index + 1}</p>
-                                </td>
-                                <td
-                                  className={`whitespace-nowrap px-6 py-4  text-lg capitalize ${
-                                    task?.is_completed
-                                      ? "line-through"
-                                      : "no-underline"
-                                  }`}
-                                >
-                                  <p>{task?.title}</p>
-                                </td>
-                                <td className="whitespace-nowrap px-6 py-4 text-lg first-letter:capitalize">
-                                  <p>{description}</p>
-                                </td>
-                                <td className="whitespace-nowrap px-6 py-4 text-lg first-letter:capitalize">
-                                  <p>{task?.priority}</p>
-                                </td>
-                                <td className="whitespace-nowrap px-6 py-4 text-lg capitalize">
-                                  <p>
-                                    {task?.status_object?.title?.split(":")[0]}
-                                  </p>
-                                </td>
-                                <td className="whitespace-nowrap px-6 py-4 text-lg">
-                                  <p>{task?.created_date?.split("T")[0]}</p>
-                                </td>
-                                <td className="whitespace-nowrap px-6 py-4 text-lg first-letter:capitalize">
-                                  <p>
-                                    {
-                                      new Date(task?.due_date as string)
-                                        .toISOString()
-                                        .split("T")[0]
-                                    }{" "}
-                                    at{" "}
-                                    {new Date(
-                                      task?.due_date as string
-                                    ).toLocaleTimeString()}
-                                  </p>
-                                </td>
-                                <td className="whitespace-nowrap px-6 py-4 text-lg">
-                                  <div className="flex justify-between">
-                                    <button
-                                      className="mr-2"
-                                      onClick={() => setShowModal(true)}
-                                    >
-                                      <EditIcon />
-                                    </button>
-                                    <button
-                                      className="mr-2"
-                                      onClick={() =>
-                                        handleTaskDelete(
-                                          task?.id as number,
-                                          task.board
-                                        )
-                                      }
-                                    >
-                                      <DeleteIcon />
-                                    </button>
-                                  </div>
-                                </td>
-                                <Modal
-                                  open={showModal}
-                                  closeCB={() => setShowModal(false)}
-                                >
-                                  <EditTask
-                                    boardId={task.board}
-                                    taskId={task.id as number}
-                                    handleCloseModal={() => setShowModal(false)}
-                                  />
-                                </Modal>
-                              </tr>
+                              <TaskRow
+                                description={description}
+                                handleTaskDelete={handleTaskDelete}
+                                task={task}
+                                index={index}
+                              />
                             ))}
                       </tbody>
                     </table>

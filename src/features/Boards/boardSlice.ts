@@ -50,6 +50,9 @@ const boardSlice = createSlice({
     setBoardDescription(state, action: PayloadAction<string>) {
       state.board.description = action.payload;
     },
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.loading = action.payload;
+    },
     resetInputs(state) {
       state.title = "";
       state.description = "";
@@ -141,7 +144,6 @@ const boardSlice = createSlice({
       state.boards = state.boards.filter(
         (board) => board.id !== action.payload
       );
-      console.log(state.boards);
     },
     addStatusesToBoard(state, action: PayloadAction<StatusWithTasks>) {
       state.loading = false;
@@ -163,6 +165,15 @@ const boardSlice = createSlice({
     },
     clearBoardWithStatuses(state) {
       state.statuses = [];
+    },
+    clearBoards(state) {
+      state.boards = [];
+    },
+    clearBoard(state) {
+      state.board = {
+        title: "",
+        description: "",
+      };
     },
   },
 
@@ -192,7 +203,6 @@ const boardSlice = createSlice({
 
     builder.addCase(deleteTaskSuccess, (state, action) => {
       state.statuses = state.statuses.map((status) => {
-        console.log(status.tasks, "from board slice");
         return {
           ...status,
           tasks: status.tasks?.filter((task) => task.id !== action.payload),
@@ -201,7 +211,6 @@ const boardSlice = createSlice({
     });
 
     builder.addCase(updateTaskStatus, (state, action) => {
-      console.log("called");
       state.loading = false;
       state.error = null;
       state.statuses = state?.statuses?.map((status) =>
@@ -237,4 +246,7 @@ export const {
   removeStatusFromBoard,
   clearBoardWithStatuses,
   updateTaksOnDnD,
+  clearBoards,
+  clearBoard,
+  setLoading,
 } = boardSlice.actions;

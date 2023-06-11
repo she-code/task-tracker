@@ -13,14 +13,31 @@ export default function SignUp() {
     (state) => state.users
   );
   const [errors, setErrors] = useState<Errors<User>>({});
+  const [displayError, setDisplayError] = useState(false);
 
   const dispatch = useAppDispacth();
+
+  //redirects to home page if user is already logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       navigate("/");
     }
   }, []);
+
+  //sets time out for error message
+  useEffect(() => {
+    if (error) {
+      setDisplayError(true);
+
+      const timeout = setTimeout(() => {
+        setDisplayError(false);
+      }, 3000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [error]);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationErrors = validateSignUpData({
@@ -41,7 +58,7 @@ export default function SignUp() {
       <form action="" onSubmit={handleSubmit}>
         <div className="p-3">
           <label
-            htmlFor="username "
+            htmlFor="username"
             className="text-xl font-semibold text-white"
           >
             Username
@@ -112,7 +129,14 @@ export default function SignUp() {
           <SubmitBtn title="Sign Up" />
         </div>
       </form>
-      {error && <p className="text-red-500">{error}</p>}
+
+      <div>
+        {displayError && (
+          <p className="bg-red-500 text-white p-3 rounded-md text-xl mt-3">
+            Unable to Sign Up. Please try again!
+          </p>
+        )}
+      </div>
       <p className="text-white text-lg ml-4">
         Already have an account?
         <span>

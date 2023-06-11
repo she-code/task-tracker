@@ -27,11 +27,8 @@ export const signUpUser = createAsyncThunk(
   async (user: User, { dispatch }) => {
     try {
       const response = await register(user);
-      console.log("response", response.detail, "detail");
 
       if (response.detail === "Verification e-mail sent.") {
-        // dispatch(getUserSuccess(user));
-        console.log("response", response);
         navigate("/login");
       }
     } catch (error) {

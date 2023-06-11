@@ -1,4 +1,3 @@
-import { Link } from "raviger";
 import React, { useEffect, useState } from "react";
 import Modal from "../../components/Common/Modal/Modal";
 import { useAppDispacth } from "../../app/hooks";
@@ -20,11 +19,7 @@ export default function TaskCard(props: {
   useEffect(() => {
     if (task && task.description) {
       setDescription(parseTaskDescription(task?.description).description);
-      console.log(
-        parseTaskDescription(task?.description).priority,
-        parseTaskDescription(task?.description).due_date,
-        parseTaskDescription(task?.description).is_completed
-      );
+
       dispatch(
         setTaskFields({
           taskId: task.id as number,
@@ -37,10 +32,9 @@ export default function TaskCard(props: {
         })
       );
     }
-    console.log({ task });
   }, [dispatch, task]);
   return (
-    <div className=" bg-gray-300 rounded-lg shadow-lg m-5 p-5  ">
+    <div className=" bg-gray-300 rounded-lg shadow-lg m-5 p-5  cursor-pointer">
       <div className="flex justify-between">
         <p
           className={`capitalize ${
@@ -80,12 +74,6 @@ export default function TaskCard(props: {
 
           {isOpen && (
             <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-lg flex flex-col  z-10">
-              <Link
-                href={`/boards/${id}`}
-                className="  px-4 py-2 text-lg font-normal text-neutral text-center hover:bg-neutral-100 w-full"
-              >
-                View
-              </Link>
               <button
                 onClick={(_) => setShowEditModal(true)}
                 className="hover:bg-neutral-100 w-full px-4 py-2 text-lg font-normal text-neutral"

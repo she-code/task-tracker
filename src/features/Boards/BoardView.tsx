@@ -19,7 +19,6 @@ import { getAuthToken } from "../../utils/storageUtils";
 const BoardList: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [limit] = useState(6);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [count, setCount] = useState(0);
@@ -31,35 +30,21 @@ const BoardList: React.FC = () => {
   const boards = useAppSelector((state: RootState) => state.boards.boards);
   const loading = useAppSelector((state: RootState) => state.boards.loading);
   const error = useAppSelector((state: RootState) => state.boards.error);
-  const getRandomColor = () => {
-    const gradients = [
-      "bg-gradient-to-r from-red-500 to-yellow-500",
-      "bg-gradient-to-r from-blue-500 to-purple-500",
-      "bg-gradient-to-r from-green-500 to-teal-500",
-      "bg-gradient-to-r from-pink-500 to-rose-500",
-      "bg-gradient-to-r from-yellow-500 to-orange-500",
-      "bg-gradient-to-r from-purple-500 to-pink-500",
-      "bg-gradient-to-r from-indigo-500 to-blue-500",
-    ];
-    const randomIndex = Math.floor(Math.random() * gradients.length);
-    return gradients[randomIndex];
-  };
-  // useEffect(() => {
-  //   dispatch(fetchBoards());
-  // }, [dispatch]);
 
+  // Redirects to login page if user is not authenticated
   useEffect(() => {
     if (getAuthToken() === null) {
       navigate("/login");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  //hanles page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
   const fetchBoards = async (offset: number, limit: number) => {
     try {
-      console.log({ offset, limit });
       const data: Pagination<Board> = await getBoards({ offset, limit });
       if (!data) {
         throw Error("No data found");
@@ -71,6 +56,7 @@ const BoardList: React.FC = () => {
     }
   };
 
+  // Fetches initial content on page reload
   useEffect(() => {
     // Fetches initial content on page reload
     fetchBoards((currentPage - 1) * limit, limit)
@@ -78,7 +64,6 @@ const BoardList: React.FC = () => {
         if (data) {
           setCount(data.count);
           dispatch(getBoardsSuccess(data.results));
-          console.log({ init: data.results });
           // Updates totalPages on page reload
           setTotalPages(Math.ceil(data.count / limit));
         }
@@ -106,10 +91,27 @@ const BoardList: React.FC = () => {
     }
   }, [currentPage, limit, offset, dispatch]);
 
+  //updates search string
   const updateSearchString = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchString(e.target.value);
   };
 
+  //get random color for board card
+  const getRandomColor = () => {
+    const gradients = [
+      "bg-gradient-to-r from-red-500 to-yellow-500",
+      "bg-gradient-to-r from-blue-500 to-purple-500",
+      "bg-gradient-to-r from-green-500 to-teal-500",
+      "bg-gradient-to-r from-pink-500 to-rose-500",
+      "bg-gradient-to-r from-yellow-500 to-orange-500",
+      "bg-gradient-to-r from-purple-500 to-pink-500",
+      "bg-gradient-to-r from-indigo-500 to-blue-500",
+    ];
+    const randomIndex = Math.floor(Math.random() * gradients.length);
+    return gradients[randomIndex];
+  };
+
+  //searches board
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setQuery({ search: searchString });
@@ -119,7 +121,9 @@ const BoardList: React.FC = () => {
   }
 
   return loading ? (
-    <Loading />
+    <div className="flex h-full">
+      <Loading />
+    </div>
   ) : (
     <div className="w-10/12  mx-auto relative h-full">
       <div className="flex justify-between items-center">
