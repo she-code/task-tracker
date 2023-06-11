@@ -1,12 +1,12 @@
 import { Link, navigate } from "raviger";
 import React, { useState, useEffect } from "react";
-import { login } from "../../utils/apiUtils";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
 import SubmitBtn from "../../components/Common/Button/SubmitBtn";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { requestFailure } from "./userSlice";
 import { RootState } from "../../app/store";
 import Loading from "../../components/Common/Loading/Loading";
+import { loginUser } from "./userActions";
 
 export default function Login() {
   const [username, setUserName] = useState("");
@@ -35,11 +35,11 @@ export default function Login() {
     event.preventDefault();
     try {
       setLoading(true);
-      const data = await login(username, password);
-      localStorage.setItem("token", data.token);
-      setLoading(false);
+      dispatch(loginUser({ username, password })).then((_) => {
+        setLoading(false);
+      });
+
       // successFullLogin();
-      navigate("/");
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));
     }

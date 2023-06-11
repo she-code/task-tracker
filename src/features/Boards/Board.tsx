@@ -165,6 +165,7 @@ export default function Board(props: { id: number }) {
         newDesc: newDescription,
       })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newDescription]);
 
   useEffect(() => {

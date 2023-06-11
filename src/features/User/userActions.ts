@@ -5,7 +5,7 @@ import {
   requestFailure,
   requestStart,
 } from "./userSlice";
-import { logout, me, register } from "../../utils/apiUtils";
+import { login, logout, me, register } from "../../utils/apiUtils";
 import { User } from "../../types/userTypes";
 import { navigate } from "raviger";
 
@@ -48,6 +48,24 @@ export const logoutUser = createAsyncThunk(
       dispatch(logoutSucces());
       localStorage.removeItem("token");
       navigate("/login");
+    } catch (error) {
+      dispatch(requestFailure((error as string).toString()));
+    }
+  }
+);
+export const loginUser = createAsyncThunk(
+  "users/loginUser",
+  async (
+    { username, password }: { username: string; password: string },
+    { dispatch }
+  ) => {
+    try {
+      const response = await login(username, password);
+      if (response) {
+        localStorage.setItem("token", response.token);
+        dispatch(fetchUser());
+        navigate("/");
+      }
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));
     }

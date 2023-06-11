@@ -37,7 +37,7 @@ export default function BoardCard(props: {
         <div className="relative">
           <button
             className="inline-flex justify-center items-center space-x-2 bg-transparent px-3 
-            py-2 rounded-md focus:outline-none "
+            py-2 rounded-md focus:outline-none cursor-pointer"
             onClick={() => setOpen(!isOpen)}
           >
             <svg

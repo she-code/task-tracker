@@ -113,7 +113,9 @@ export default function TaskCard(props: {
           {task.due_date !== ""
             ? `Due on: ${new Date(
                 task?.due_date as string
-              ).toLocaleDateString()}`
+              ).toLocaleDateString()} at ${new Date(
+                task?.due_date as string
+              ).toLocaleTimeString()}`
             : "No Due Date"}
         </p>
       </div>

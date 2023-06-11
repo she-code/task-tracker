@@ -16,7 +16,7 @@ import SearchBar from "../../components/Common/Search/SearchBar";
 import { navigate, useQueryParams } from "raviger";
 import { getAuthToken } from "../../utils/storageUtils";
 
-const BoardList: React.FC = () => {
+export function BoardList() {
   const [showModal, setShowModal] = useState(false);
   const [limit] = useState(6);
   const [currentPage, setCurrentPage] = useState(1);
@@ -157,7 +157,18 @@ const BoardList: React.FC = () => {
         </div>
       </div>
       {boards.length > 0 ? (
-        <>
+        <div className="relative flex flex-col justify-between">
+          <div className=" mb-10">
+            <BoardPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              count={count}
+              offset={offset}
+              limit={limit}
+            />
+          </div>
+
           <div className="grid md:grid-cols-3 sm:grid-cols-1  gap-3 mt-5 w-full">
             {boards
               ?.filter((board: Board) =>
@@ -173,18 +184,11 @@ const BoardList: React.FC = () => {
                 />
               ))}
           </div>
-          <BoardPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            count={count}
-            offset={offset}
-            limit={limit}
-          />
+
           <Modal open={showModal} closeCB={() => setShowModal(false)}>
             <CreateBoard handleClose={() => setShowModal(false)} />
           </Modal>
-        </>
+        </div>
       ) : (
         <div className="mt-5">
           <h2 className="text-2xl font-semibold text-white">
@@ -194,6 +198,6 @@ const BoardList: React.FC = () => {
       )}
     </div>
   );
-};
+}
 
 export default BoardList;
