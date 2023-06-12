@@ -4,7 +4,7 @@ import { fetchUser } from "../features/User/userActions";
 import { useAppDispacth, useAppSelector } from "../app/hooks";
 import { RootState } from "../app/store";
 
-import Sidebar from "./Common/SideBar/Sidebar";
+import Sidebar from "./Common/Sidebar/Sidebar";
 
 import bgImg from "../../src/background.jpg";
 export default function AppContainer(props: {
