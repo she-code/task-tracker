@@ -12,6 +12,7 @@ import {
 } from "./boardSlice";
 import { Errors } from "../../types/common";
 import { createBoardAction } from "./boardActions";
+import { createSuccess } from "../../components/Common/Notifications";
 
 export default function CreateBoard(props: { handleClose: () => void }) {
   const [errors, setErrors] = useState<Errors<Board>>({});
@@ -34,6 +35,7 @@ export default function CreateBoard(props: { handleClose: () => void }) {
         dispatch(createBoardAction({ title, description })).then((_) => {
           setLoading(false);
           dispatch(resetInputs());
+          createSuccess();
           handleClose();
         });
       } catch (error) {
