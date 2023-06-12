@@ -26,10 +26,13 @@ export const signUpUser = createAsyncThunk(
   "users/signUpUser",
   async (user: User, { dispatch }) => {
     try {
+      dispatch(requestStart());
       const response = await register(user);
 
       if (response.detail === "Verification e-mail sent.") {
         navigate("/login");
+      } else {
+        dispatch(requestFailure("Unable to sign up"));
       }
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));
@@ -56,15 +59,18 @@ export const logoutUser = createAsyncThunk(
 export const loginUser = createAsyncThunk(
   "users/loginUser",
   async (
-    { username, password }: { username: string; password: string },
+    { username, password1 }: { username: string; password1: string },
     { dispatch }
   ) => {
     try {
-      const response = await login(username, password);
+      dispatch(requestStart());
+      const response = await login(username, password1);
       if (response) {
         localStorage.setItem("token", response.token);
         dispatch(fetchUser());
         navigate("/");
+      } else {
+        dispatch(requestFailure("Invalid Credentials"));
       }
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));

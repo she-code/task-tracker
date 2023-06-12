@@ -7,10 +7,13 @@ import { requestFailure } from "./userSlice";
 import { RootState } from "../../app/store";
 import Loading from "../../components/Common/Loading/Loading";
 import { loginUser } from "./userActions";
+import { Errors } from "../../types/common";
+import { User, validateSignInData } from "../../types/userTypes";
 
 export default function Login() {
   const [username, setUserName] = useState("");
-  const [password, setPassword] = useState("");
+  const [password1, setPassword] = useState("");
+  const [errors, setErrors] = useState<Errors<User>>({});
 
   const dispatch = useAppDispacth();
   const [loading, setLoading] = useState(false);
@@ -34,13 +37,18 @@ export default function Login() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      setLoading(true);
-      dispatch(loginUser({ username, password })).then((_) => {
-        setLoading(false);
-      });
+      const validationErrors = validateSignInData(username, password1);
+      setErrors(validationErrors);
 
+      if (Object.keys(validationErrors).length === 0) {
+        setLoading(true);
+        dispatch(loginUser({ username, password1 })).then((_) => {
+          setLoading(false);
+        });
+      }
       // successFullLogin();
     } catch (error) {
+      console.log(error);
       dispatch(requestFailure((error as string).toString()));
     }
   };
@@ -69,6 +77,7 @@ export default function Login() {
             value={username}
             name="username"
           />
+          {errors.username && <p className="text-red-500">{errors.username}</p>}
         </div>
 
         <div className="p-2  ">
@@ -82,8 +91,11 @@ export default function Login() {
             handleInputChangeCB={(e) => setPassword(e.target.value)}
             type="password"
             name="password"
-            value={password}
+            value={password1}
           />
+          {errors.password1 && (
+            <p className="text-red-500">{errors.password1}</p>
+          )}
         </div>
 
         <div className="p-3">

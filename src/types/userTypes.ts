@@ -51,3 +51,14 @@ export const validateSignUpData = (user: User) => {
   }
   return errors;
 };
+
+export const validateSignInData = (username: string, password1: string) => {
+  const errors: Errors<User> = {};
+  if (username.length < 1) {
+    errors.username = "Username is required";
+  }
+  if (password1.length < 8) {
+    errors.password1 = "Password is required";
+  }
+  return errors;
+};

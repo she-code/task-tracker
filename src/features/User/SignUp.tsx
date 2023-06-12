@@ -14,6 +14,7 @@ export default function SignUp() {
   );
   const [errors, setErrors] = useState<Errors<User>>({});
   const [displayError, setDisplayError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const dispatch = useAppDispacth();
 
@@ -48,7 +49,12 @@ export default function SignUp() {
     });
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
-      dispatch(signUpUser({ username, password1, password2, email }));
+      setLoading(true);
+      dispatch(signUpUser({ username, password1, password2, email })).then(
+        (_) => {
+          setLoading(false);
+        }
+      );
     }
   };
 
@@ -126,7 +132,7 @@ export default function SignUp() {
           )}
         </div>
         <div className="p-3">
-          <SubmitBtn title="Sign Up" />
+          <SubmitBtn title={loading ? "Please wait..." : "Sign Up"} />
         </div>
       </form>
 
