@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Tooltip from "../../components/Common/Tooltip/Tooltip";
+import AddIcon from "../../components/Common/Icons/AddIcon";
 
 export default function TaskFilterMenu(props: {
   setFilterTasks: (filter: string) => void;
@@ -81,20 +82,7 @@ export default function TaskFilterMenu(props: {
             rounded-md items-center justify-center py-2"
             onClick={() => setShowCreateTaskModal(true)}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 6v12m6-6H6"
-              />
-            </svg>
+            <AddIcon />
             Add New Task
           </button>
 

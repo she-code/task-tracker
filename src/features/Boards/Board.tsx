@@ -25,6 +25,7 @@ import { getAuthToken } from "../../utils/storageUtils";
 import { navigate } from "raviger";
 import CheckIcon from "../../components/Common/Icons/CheckIcon";
 import { deleteSuccess } from "../../components/Common/Notifications";
+import AddIcon from "../../components/Common/Icons/AddIcon";
 
 export default function Board(props: { id: number }) {
   const { id } = props;
@@ -189,22 +190,7 @@ export default function Board(props: { id: number }) {
           </p>
         </div>
         <ModalOpenerBtn
-          icon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 6v12m6-6H6"
-              />
-            </svg>
-          }
+          icon={<AddIcon />}
           title="Add List"
           onClickCB={() => setShowStatusModel(true)}
         />

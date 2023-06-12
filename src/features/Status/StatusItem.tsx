@@ -9,6 +9,7 @@ import Tooltip from "../../components/Common/Tooltip/Tooltip";
 import { parseTaskDescription } from "../../types/taskTypes";
 import EditIcon from "../../components/Common/Icons/EditIcon";
 import EditStatus from "./EditStatus";
+import AddIcon from "../../components/Common/Icons/AddIcon";
 
 const StatusItem = (props: {
   status: Status;
@@ -123,21 +124,7 @@ const StatusItem = (props: {
           setSelectedStatusId(status?.id as number);
         }}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-6 h-6"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 6v12m6-6H6"
-          />
-        </svg>
-
+        <AddIcon />
         <span className="text-lg ml-2">Add Task</span>
       </button>
       <Modal open={editStatusModal} closeCB={() => setEditStatusModal(false)}>

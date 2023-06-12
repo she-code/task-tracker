@@ -82,6 +82,8 @@ export default function Home() {
       };
 
       fetchTasksForBoards();
+    } else if (boards.length === 0) {
+      setIsLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boards, tasks]);

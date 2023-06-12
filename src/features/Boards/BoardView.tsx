@@ -15,6 +15,7 @@ import { getBoardsSuccess, requestFailure } from "./boardSlice";
 import SearchBar from "../../components/Common/Search/SearchBar";
 import { navigate, useQueryParams } from "raviger";
 import { getAuthToken } from "../../utils/storageUtils";
+import AddIcon from "../../components/Common/Icons/AddIcon";
 
 export function BoardList() {
   const [showModal, setShowModal] = useState(false);
@@ -135,22 +136,7 @@ export function BoardList() {
             handleInputChangeCB={updateSearchString}
           />
           <ModalOpenerBtn
-            icon={
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 6v12m6-6H6"
-                />
-              </svg>
-            }
+            icon={<AddIcon />}
             title="New Board"
             onClickCB={() => setShowModal(true)}
           />
@@ -183,9 +169,6 @@ export function BoardList() {
               limit={limit}
             />
           </div>
-          <Modal open={showModal} closeCB={() => setShowModal(false)}>
-            <CreateBoard handleClose={() => setShowModal(false)} />
-          </Modal>
         </div>
       ) : (
         <div className="mt-5">
@@ -194,6 +177,9 @@ export function BoardList() {
           </h2>
         </div>
       )}
+      <Modal open={showModal} closeCB={() => setShowModal(false)}>
+        <CreateBoard handleClose={() => setShowModal(false)} />
+      </Modal>
     </div>
   );
 }
