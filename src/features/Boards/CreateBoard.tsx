@@ -2,23 +2,21 @@ import React, { useState } from "react";
 import CustomInputField from "../../components/Common/InputField/CustomInputField";
 
 import { Board, validateBoard } from "../../types/boardTypes";
-import { createBoard } from "../../utils/apiUtils";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
 import {
-  createBoardSuccess,
   requestFailure,
-  requestStart,
   resetInputs,
   setDescription,
   setTitle,
 } from "./boardSlice";
 import { Errors } from "../../types/common";
+import { createBoardAction } from "./boardActions";
 
 export default function CreateBoard(props: { handleClose: () => void }) {
   const [errors, setErrors] = useState<Errors<Board>>({});
   const dispatch = useAppDispacth();
-  const loading = useAppSelector((state: RootState) => state.boards.loading);
+  const [loading, setLoading] = useState(false);
   const error = useAppSelector((state: RootState) => state.boards.error);
   const title = useAppSelector((state: RootState) => state.boards.title);
   const description = useAppSelector(
@@ -32,14 +30,12 @@ export default function CreateBoard(props: { handleClose: () => void }) {
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const data = await createBoard({ title, description });
-        dispatch(requestStart());
-        if (data) {
-          dispatch(createBoardSuccess(data));
+        setLoading(true);
+        dispatch(createBoardAction({ title, description })).then((_) => {
+          setLoading(false);
           dispatch(resetInputs());
           handleClose();
-          // window.location.reload();
-        }
+        });
       } catch (error) {
         dispatch(requestFailure((error as string).toString()));
       }

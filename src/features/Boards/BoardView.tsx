@@ -158,17 +158,6 @@ export function BoardList() {
       </div>
       {boards.length > 0 ? (
         <div className="relative flex flex-col justify-between">
-          <div className=" mb-10">
-            <BoardPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-              count={count}
-              offset={offset}
-              limit={limit}
-            />
-          </div>
-
           <div className="grid md:grid-cols-3 sm:grid-cols-1  gap-3 mt-5 w-full">
             {boards
               ?.filter((board: Board) =>
@@ -184,7 +173,16 @@ export function BoardList() {
                 />
               ))}
           </div>
-
+          <div className=" mt-3">
+            <BoardPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              count={count}
+              offset={offset}
+              limit={limit}
+            />
+          </div>
           <Modal open={showModal} closeCB={() => setShowModal(false)}>
             <CreateBoard handleClose={() => setShowModal(false)} />
           </Modal>

@@ -5,7 +5,6 @@ import SubmitBtn from "../../components/Common/Button/SubmitBtn";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { requestFailure } from "./userSlice";
 import { RootState } from "../../app/store";
-import Loading from "../../components/Common/Loading/Loading";
 import { loginUser } from "./userActions";
 import { Errors } from "../../types/common";
 import { User, validateSignInData } from "../../types/userTypes";
@@ -99,7 +98,7 @@ export default function Login() {
         </div>
 
         <div className="p-3">
-          {loading ? <Loading /> : <SubmitBtn title="Sign In" />}
+          <SubmitBtn title={loading ? "Please wait..." : "Sign In"} />
         </div>
       </form>
       <p className="text-white text-lg ml-4">

@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  createBoard,
+  createBoardApi,
   deleteBoard,
   editBoard,
   getBoard,
@@ -61,8 +61,8 @@ export const createBoardAction = createAsyncThunk(
   "boards/createBoard",
   async (boardData: Board, { dispatch }) => {
     try {
-      dispatch(requestStart());
-      const newBoard = await createBoard(boardData);
+      // dispatch(requestStart());
+      const newBoard = await createBoardApi(boardData);
       dispatch(createBoardSuccess(newBoard));
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));

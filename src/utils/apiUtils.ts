@@ -86,7 +86,7 @@ export const getBoards = (pageParams?: PaginationParams) => {
   return request("boards/", "GET", pageParams);
 };
 
-export const createBoard = (board: Board) => {
+export const createBoardApi = (board: Board) => {
   return request("boards/", "POST", board);
 };
 export const editBoard = (board: Board, id: number) => {
