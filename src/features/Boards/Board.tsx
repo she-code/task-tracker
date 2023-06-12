@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
-import { debounce } from "lodash";
 
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
@@ -8,11 +7,7 @@ import { fetchTasks, updateTaskStatusAction } from "../Tasks/taskActions";
 import Loading from "../../components/Common/Loading/Loading";
 import Modal from "../../components/Common/Modal/Modal";
 import CreateStatus from "../Status/CreateStatus";
-import {
-  deleteStatusAction,
-  fetchStatuses,
-  updateStatusDescAction,
-} from "../Status/statusAction";
+import { deleteStatusAction, fetchStatuses } from "../Status/statusAction";
 import { Status } from "../../types/statusTypes";
 
 import StatusItem from "../Status/StatusItem";
@@ -36,8 +31,7 @@ export default function Board(props: { id: number }) {
   const [showStatusModel, setShowStatusModel] = useState(false);
 
   const dispatch = useAppDispacth();
-  const [statusD, setStatusData] = useState<Status | null>(null);
-  const [newDescription, setNewDescription] = useState("");
+
   const tasks = useAppSelector((state: RootState) => state.tasks.tasks);
   const loading = useAppSelector((state: RootState) => state.tasks.loading);
   const board = useAppSelector((state: RootState) => state.boards.board);
@@ -123,56 +117,6 @@ export default function Board(props: { id: number }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const handleDescriptionChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    status: Status
-  ) => {
-    const newDesc = e?.target?.value;
-    // setStatusDescription(newDesc);
-    setNewDescription(newDesc);
-    setStatusData(status);
-    // debouncedUpdateStatusDesc(status, newDesc);
-  };
-  // const [inputValue, setInputValue] = React.useState("");
-  // const handleInputChange = (
-  //   event: React.ChangeEvent<HTMLInputElement>,
-  //   status: Status
-  // ) => {
-  //   setInputValue(event.target.value);
-  //   setStatusData(status);
-  // };
-  // const [debouncedInputValue, setDebouncedInputValue] = React.useState("");
-  // useEffect(() => {
-  //   const delayInputTimeoutId = setTimeout(() => {
-  //     setDebouncedInputValue(inputValue);
-  //   }, 500);
-  //   return () => clearTimeout(delayInputTimeoutId);
-  // }, [inputValue, 500]);
-
-  const dispatchUpdateStatusDesc = (statusData: Status, newDesc: string) => {
-    dispatch(
-      updateStatusDescAction({
-        statusData: statusData,
-        newDesc: newDesc,
-      })
-    );
-  };
-  const debouncedUpdateStatusDesc = debounce(handleDescriptionChange, 200);
-  useEffect(() => {
-    dispatch(
-      updateStatusDescAction({
-        statusData: statusD as Status,
-        newDesc: newDescription,
-      })
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newDescription]);
-
-  useEffect(() => {
-    return () => {
-      debouncedUpdateStatusDesc.cancel();
-    };
-  }, [debouncedUpdateStatusDesc]);
 
   //deltes a status
   const handleDeleteStatus = (statusId: number) => {
@@ -180,17 +124,6 @@ export default function Board(props: { id: number }) {
       deleteSuccess();
     });
   };
-
-  // useEffect(() => {
-  //   if (debouncedInputValue) {
-  //     dispatch(
-  //       updateStatusDescAction({
-  //         statusData: statusD as Status,
-  //         newDesc: debouncedInputValue,
-  //       })
-  //     );
-  //   }
-  // }, [debouncedInputValue, dispatch, statusD]);
 
   //handles drag and drop
   const handleDragEnd = async (result: DropResult) => {
@@ -297,10 +230,8 @@ export default function Board(props: { id: number }) {
                     <StatusItem
                       key={status?.id}
                       status={status}
-                      dispatch={dispatch}
                       id={id}
                       handleDeleteStatusCB={handleDeleteStatus}
-                      handleDescriptionChangeCB={handleDescriptionChange}
                     />
                   );
                 })}

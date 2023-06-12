@@ -1,32 +1,24 @@
 import React, { useState } from "react";
-import { updateStatusTitleAction } from "./statusAction";
 import { Status } from "../../types/statusTypes";
 import Modal from "../../components/Common/Modal/Modal";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import CreateTask from "../Tasks/CreateTask";
 import TaskCard1 from "../Tasks/TaskCard1";
-import { AppDispatch } from "../../app/store";
 import DeleteIcon from "../../components/Common/Icons/DeleteIcon";
+import Tooltip from "../../components/Common/Tooltip/Tooltip";
+import { parseTaskDescription } from "../../types/taskTypes";
+import EditIcon from "../../components/Common/Icons/EditIcon";
+import EditStatus from "./EditStatus";
 
 const StatusItem = (props: {
   status: Status;
   id: number;
-  dispatch: AppDispatch;
   handleDeleteStatusCB: (statusId: number) => void;
-  handleDescriptionChangeCB: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    status: Status
-  ) => void;
 }) => {
-  const {
-    status,
-    id,
-    dispatch,
-    handleDeleteStatusCB,
-    handleDescriptionChangeCB,
-  } = props;
+  const { status, id, handleDeleteStatusCB } = props;
 
   const [showDeleteBtn, setShowDeleteBtn] = useState(false);
+  const [editStatusModal, setEditStatusModal] = useState(false);
   const [showTaskModel, setShowTaskModel] = useState(false);
   const [selectedStatusId, setSelectedStatusId] = useState<number | null>();
   const [taskVisibility, setTaskVisibility] = useState<{
@@ -42,47 +34,30 @@ const StatusItem = (props: {
     >
       <div>
         <div className="flex items-center">
-          <input
-            type="text"
-            name={status.title}
-            value={status?.title.split(":")[0]}
-            id=""
-            className="border-0 focus:outline-none focus:border-2 focus:border-green-500 p-2 rounded-md w-full capitalize text-xl font-semibold  mr-3"
-            onChange={(e) =>
-              dispatch(
-                updateStatusTitleAction({
-                  statusData: status,
-                  newTitle: e.target.value,
-                  boardId: id,
-                })
-              )
-            }
-          />
+          <p className="text-xl font-semibold capitalize mr-3 w-full">
+            {status.title.split(":")[0]}
+          </p>
+
           {showDeleteBtn && (
-            <button
-              className="focus:outline-none "
-              onClick={() => handleDeleteStatusCB(status?.id as number)}
-            >
-              <DeleteIcon />
-            </button>
+            <div className="flex justify-between">
+              <button
+                className="focus:outline-none hover:bg-neutral-100 p-1 rounded-md mr-3"
+                onClick={() => handleDeleteStatusCB(status?.id as number)}
+              >
+                <DeleteIcon />
+              </button>
+              <button
+                className="focus:outline-none hover:bg-neutral-100 p-1 rounded-md"
+                onClick={() => setEditStatusModal(true)}
+              >
+                <EditIcon />
+              </button>
+            </div>
           )}
         </div>
-        <input
-          type="text"
-          name={status.description}
-          value={status?.description}
-          id=""
-          className="border-0 focus:outline-none focus:border-2 pl-2 focus:border-green-500 focus:p-2 rounded-md w-full capitalize text-md mb-3 mr-3 text-gray-500"
-          onChange={
-            (e) => handleDescriptionChangeCB(e, status)
-            // dispatch(
-            //   updateStatusDescAction({
-            //     statusData: status,
-            //     newDesc: e.target.value,
-            //   })
-            // )
-          }
-        />
+        <p className="text-md text-gray-500 mb-3 capitalize">
+          {status?.description}
+        </p>
       </div>
       {status && (
         <Droppable droppableId={status?.id?.toString() || ""}>
@@ -102,13 +77,19 @@ const StatusItem = (props: {
                     index={index}
                   >
                     {(provided) => (
-                      <TaskCard1
-                        task={task}
-                        provided={provided}
-                        boardId={id}
-                        isVisible={isVisible}
-                        setTaskVisibility={setTaskVisibility}
-                      />
+                      <Tooltip
+                        message={
+                          parseTaskDescription(task?.description).description
+                        }
+                      >
+                        <TaskCard1
+                          task={task}
+                          provided={provided}
+                          boardId={id}
+                          isVisible={isVisible}
+                          setTaskVisibility={setTaskVisibility}
+                        />
+                      </Tooltip>
                     )}
                   </Draggable>
                 );
@@ -159,6 +140,13 @@ const StatusItem = (props: {
 
         <span className="text-lg ml-2">Add Task</span>
       </button>
+      <Modal open={editStatusModal} closeCB={() => setEditStatusModal(false)}>
+        <EditStatus
+          statusId={status?.id as number}
+          boardId={id}
+          handleCloseModal={() => setEditStatusModal(false)}
+        />
+      </Modal>
     </div>
   );
 };

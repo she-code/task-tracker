@@ -138,3 +138,7 @@ export const updateStatusApi = (status: Status, id: number) => {
 export const deleteStatusApi = (id: number) => {
   return request(`status/${id}/`, "DELETE", {});
 };
+
+export const fetchStatusApi = (id: number) => {
+  return request(`status/${id}/`, "GET", {});
+};

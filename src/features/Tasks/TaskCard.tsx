@@ -12,7 +12,7 @@ export default function TaskCard(props: {
   handleDeleteTaskActionCB: (taskId: number, boardId: number) => void;
 }) {
   const { task, id, boardId, handleDeleteTaskActionCB } = props;
-  const [isOpen, setOpen] = React.useState(false);
+  const [isOpen, setOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [description, setDescription] = useState("");
   const dispatch = useAppDispacth();

@@ -42,7 +42,7 @@ export default function TaskCard1(props: {
   };
   return (
     <div
-      className={` bg-gray-100 p-2 my-2 rounded-md flex justify-between items-center
+      className={`w-full bg-gray-100 p-2 my-2 rounded-md flex justify-between items-center
        ${
          priority === "high"
            ? "border-b-2 border-red-500"

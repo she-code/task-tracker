@@ -7,13 +7,19 @@ import Board from "../features/Boards/Board";
 import Todos from "../features/Tasks/Tasks";
 import SignUp from "../features/User/SignUp";
 import NotFound from "../components/Common/NotFound/NotFound";
+import { Suspense } from "react";
+import Loading from "../components/Common/Loading/Loading";
 
 export default function AppRouter(props: {
   collapsed: boolean;
   toggleCollapsedCB: () => void;
 }) {
   const routes = {
-    "/": () => <Home />,
+    "/": () => (
+      <Suspense fallback={<Loading />}>
+        <Home />
+      </Suspense>
+    ),
     "/login": () => <Login />,
     "/signup": () => <SignUp />,
     "/boards": () => <BoardList />,

@@ -68,17 +68,38 @@ const StatusSlice = createSlice({
         (status) => status.id !== action.payload
       );
     },
+    updateStatusDesc(state, action: PayloadAction<string>) {
+      state.status.description = action.payload;
+    },
+    updateStatusTitle(state, action: PayloadAction<string>) {
+      state.status.title = action.payload;
+    },
+    getStatusSuccess(state, action: PayloadAction<Status>) {
+      state.statusLoading = false;
+      state.statusError = null;
+      state.status = action.payload;
+    },
+    clearStatus(state) {
+      state.status = {
+        title: "",
+        description: "",
+      };
+    },
   },
 });
 export default StatusSlice.reducer;
 export const {
   getStatusesSuccess,
   createStatusSuccess,
+  updateStatusDesc,
   requestFailure,
   requestStart,
   setDescription,
   setTitle,
   updateStatus,
   deleteStatus,
+  clearStatus,
   setStatusWithTasks,
+  updateStatusTitle,
+  getStatusSuccess,
 } = StatusSlice.actions;

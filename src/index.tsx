@@ -14,7 +14,7 @@ const root = ReactDOM.createRoot(
 
 if (process.env.REACT_APP_SENTRY_DSN) {
   Sentry.init({
-    dsn: "https://c6c37ee01efe413bb43efcb62b1cbdb5@o4505239783014400.ingest.sentry.io/4505339927986176",
+    dsn: process.env.REACT_APP_SENTRY_DSN,
     integrations: [
       new Sentry.BrowserTracing({
         tracePropagationTargets: [

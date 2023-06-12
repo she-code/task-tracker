@@ -2,6 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   createStatusApi,
   deleteStatusApi,
+  fetchStatusApi,
   getStatusesApi,
   updateStatusApi,
 } from "../../utils/apiUtils";
@@ -9,6 +10,7 @@ import { Status } from "../../types/statusTypes";
 import {
   createStatusSuccess,
   deleteStatus,
+  getStatusSuccess,
   getStatusesSuccess,
   requestFailure,
   requestStart,
@@ -110,6 +112,45 @@ export const deleteStatusAction = createAsyncThunk(
       await deleteStatusApi(statusId);
       dispatch(deleteStatus(statusId));
       // dispatch(removeStatusFromBoard(statusId));
+    } catch (error) {
+      dispatch(requestFailure((error as string).toString()));
+    }
+  }
+);
+
+export const updateStatusAction = createAsyncThunk(
+  "status/updateStatus",
+  async (
+    { statusData, boardId }: { statusData: Status; boardId: number },
+    { dispatch }
+  ) => {
+    try {
+      const updatedStatustitle = {
+        ...statusData,
+        title: statusData?.title.concat(`:${boardId}`),
+      };
+      const updatedStatus = await updateStatusApi(
+        updatedStatustitle,
+        statusData?.id as number
+      );
+      if (updatedStatus) {
+        dispatch(updateStatus(updatedStatus));
+      }
+    } catch (error) {
+      dispatch(requestFailure((error as string).toString()));
+    }
+  }
+);
+
+export const fetchStatus = createAsyncThunk(
+  "status/fetchStatus",
+  async ({ statusId }: { statusId: number }, { dispatch }) => {
+    try {
+      // dispatch(requestStart());
+      const status = await fetchStatusApi(statusId);
+      if (status) {
+        dispatch(getStatusSuccess(status));
+      }
     } catch (error) {
       dispatch(requestFailure((error as string).toString()));
     }
