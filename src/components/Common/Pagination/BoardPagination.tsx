@@ -43,7 +43,7 @@ export default function BoardPagination(props: PaginationProps) {
   };
 
   return (
-    <div className="flex items-center justify-between  px-4 py-3 sm:px-6 absolute  right-8 md:top-0 mb-8">
+    <div className="flex items-center justify-between  px-4 py-3 sm:px-6  mb-8">
       <div className="flex flex-1 justify-between sm:hidden">
         {currentPage > 1 && (
           <button
